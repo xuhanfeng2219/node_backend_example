@@ -4,11 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-14 21:17:41
+ * @LastEditTime: 2023-05-15 19:45:57
  */
 import express from 'express';
 
-import { getUsers, deleteUserById, getUserById } from 'db/users';
+import { getUsers, deleteUserById, getUserById } from '../db/users';
 
 export const getAllUsers = async (req: express.Request, res: express.Response) => {
     try {

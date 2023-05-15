@@ -4,11 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:29:32
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-14 20:48:33
+ * @LastEditTime: 2023-05-15 19:43:44
  */
 import express from 'express';
 
-import { login, register } from 'controllers/authentication';
+import { login, register } from '../controllers/authentication';
 
 export default(router: express.Router) => {
     router.post('/auth/register', register);

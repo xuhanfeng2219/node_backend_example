@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:49:28
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-14 21:11:57
+ * @LastEditTime: 2023-05-15 19:44:22
  */
 import express from 'express';
 
 import { get, merge } from 'lodash';
 
-import { getUserBySessionToken } from 'db/users';
+import { getUserBySessionToken } from '../db/users';
 
 export const isAuthenticated = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {

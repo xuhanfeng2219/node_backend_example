@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:19:07
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-14 20:37:33
+ * @LastEditTime: 2023-05-15 18:51:34
  */
 import express from 'express';
 import http from 'http';
@@ -13,7 +13,7 @@ import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import cors from 'cors';
 import mongoose, { Promise } from 'mongoose';
-import router from 'router';
+import router from './router/index';
 
 const app = express();
 

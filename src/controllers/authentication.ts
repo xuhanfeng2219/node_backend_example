@@ -4,12 +4,12 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:16:05
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-14 20:47:43
+ * @LastEditTime: 2023-05-15 19:45:46
  */
 import express from 'express';
 
-import { getUserByEmail, createUser } from 'db/users';
-import { random, authentication } from 'helpers';
+import { getUserByEmail, createUser } from '../db/users';
+import { random, authentication } from '../helpers';
 
 export const register = async (req: express.Request, res: express.Response) => {
     try {
