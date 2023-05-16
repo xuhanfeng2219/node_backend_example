@@ -4,22 +4,22 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:16:05
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-15 19:45:46
+ * @LastEditTime: 2023-05-16 14:29:14
  */
 import express from 'express';
 
-import { getUserByEmail, createUser } from '../db/users';
+import { getUserByUsername, createUser } from '../db/users';
 import { random, authentication } from '../helpers';
 
 export const register = async (req: express.Request, res: express.Response) => {
     try {
-        const {email, password, username} = req.body;
+        const { password, username} = req.body;
 
-        if (!email || !password || !username) {
+        if (!password || !username) {
             return res.sendStatus(400);
         }
 
-        const existingUser = await getUserByEmail(email);
+        const existingUser = await getUserByUsername(username);
 
         if (existingUser) {
             return res.sendStatus(400);
@@ -28,7 +28,6 @@ export const register = async (req: express.Request, res: express.Response) => {
         const salt = random;
 
         const user = await createUser({
-            email,
             username,
             authentication: {
                 salt,
@@ -46,13 +45,13 @@ export const register = async (req: express.Request, res: express.Response) => {
 
 export const login = async (req: express.Request, res: express.Response) => {
     try {
-        const {email, password} = req.body;
+        const {username, password} = req.body;
 
-        if (!email || !password) {
+        if (!username || !password) {
             return res.sendStatus(400);
         }
 
-        const user = await getUserByEmail(email).select('+authentication.salt +authentication.password');
+        const user = await getUserByUsername(username).select('+authentication.salt +authentication.password');
 
         if (!user) {
             return res.sendStatus(400);

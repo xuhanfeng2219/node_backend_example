@@ -4,13 +4,12 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-14 20:36:59
+ * @LastEditTime: 2023-05-16 14:28:04
  */
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema({
     username: { type: String, required: true},
-    email: { type: String, required: true},
     authentication: { 
         password: { type: String, required: true, select: false },
         salt: { type: String, select: false },
@@ -21,7 +20,7 @@ const UserSchema = new mongoose.Schema({
 export const UserModel = mongoose.model('User', UserSchema);
 
 export const getUsers = () => UserModel.find();
-export const getUserByEmail = (email: string) => UserModel.findOne( {email});
+export const getUserByUsername = (username: string) => UserModel.findOne( {username});
 export const getUserBySessionToken = (sessionToken: string) => UserModel.findOne({
     'authentication.sessionToken': sessionToken
 });
