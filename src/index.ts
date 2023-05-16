@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:19:07
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-16 14:20:22
+ * @LastEditTime: 2023-05-16 18:43:06
  */
 import express from 'express';
 import http from 'http';
@@ -44,6 +44,5 @@ mongoose.Promise = Promise;
 mongoose.connect(MONGO_URL, options).then(() => {
     console.log('Connected to mongodb successful!');
 }, (err: Error) => console.log(err) )
-// mongoose.connection.on('error', (err: Error) => console.log(err));
 
 app.use('/', router());

@@ -4,22 +4,22 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:16:05
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-16 14:29:14
+ * @LastEditTime: 2023-05-16 17:40:27
  */
 import express from 'express';
 
-import { getUserByUsername, createUser } from '../db/users';
+import { getUserByUsername, createUser, getUserByEmail } from '../db/users';
 import { random, authentication } from '../helpers';
 
 export const register = async (req: express.Request, res: express.Response) => {
     try {
-        const { password, username} = req.body;
+        const { password, username, email } = req.body;
 
-        if (!password || !username) {
+        if (!password || !username || !email) {
             return res.sendStatus(400);
         }
 
-        const existingUser = await getUserByUsername(username);
+        const existingUser = await getUserByUsername(username) || await getUserByEmail(email);
 
         if (existingUser) {
             return res.sendStatus(400);
@@ -29,6 +29,7 @@ export const register = async (req: express.Request, res: express.Response) => {
 
         const user = await createUser({
             username,
+            email,
             authentication: {
                 salt,
                 password: authentication(salt, password),
@@ -67,7 +68,7 @@ export const login = async (req: express.Request, res: express.Response) => {
         user.authentication.sessionToken = authentication(salt, user._id.toString());
         
         await user.save();
-
+        //  this domain need to changed when we push to the aws
         res.cookie('XUHANFENG-AUTH', user.authentication.sessionToken, { domain: 'localhost', path: '/' });
 
         return res.status(200).json(user).end();

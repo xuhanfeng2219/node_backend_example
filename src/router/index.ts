@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:28:02
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-14 21:03:16
+ * @LastEditTime: 2023-05-16 18:42:45
  */
 import express from 'express';
 
@@ -17,4 +17,4 @@ export default(): express.Router => {
     authentication(router);
     users(router);
     return router;
-}
+};
