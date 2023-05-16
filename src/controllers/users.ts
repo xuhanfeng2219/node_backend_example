@@ -4,12 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-16 19:49:38
+ * @LastEditTime: 2023-05-16 20:41:39
  */
 import express from 'express';
 
 import { getUsers, deleteUserById, getUserById, getUserByUsername, getUsersCount } from '../db/users';
 import { Page , Result} from '../common/common';
+import { logger } from '../common/log';
 
 export const getAllUsers = async (req: express.Request, res: express.Response) => {
     try {
@@ -17,7 +18,7 @@ export const getAllUsers = async (req: express.Request, res: express.Response) =
 
         return res.status(200).json(users);
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         return res.sendStatus(400);
     }
 };
@@ -36,7 +37,7 @@ export const getUsersByPage = async (req: express.Request, res: express.Response
         result.limit = limit;
         return res.status(200).json(result);
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         return res.sendStatus(400);
     }
 };
@@ -49,7 +50,7 @@ export const deleteUser = async (req: express.Request, res: express.Response) =>
 
         return res.status(200).json(deleteUser); 
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         return res.sendStatus(400);
     }
 };
@@ -75,7 +76,7 @@ export const updateUser = async (req: express.Request, res: express.Response) =>
         return res.status(200).json(user).end();
 
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         return res.sendStatus(400);
     }
 };
