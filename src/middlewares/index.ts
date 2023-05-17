@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:49:28
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-16 18:58:45
+ * @LastEditTime: 2023-05-17 14:14:15
  */
 import express from 'express';
 
@@ -12,12 +12,14 @@ import { get, merge } from 'lodash';
 
 import { getUserBySessionToken } from '../db/users';
 
+import { logger } from '../common/log';
+
 export const isAuthenticated = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
         const sessionToken = req.cookies['XUHANFENG-AUTH'];
 
         if (!sessionToken) {
-            return res.sendStatus(403);
+            return res.sendStatus(403).json({msg: 'Token can\'t set '});
         }
 
         const existingUser = await getUserBySessionToken(sessionToken);
@@ -30,7 +32,7 @@ export const isAuthenticated = async (req: express.Request, res: express.Respons
 
         return next();
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         return res.sendStatus(400);
     }
 };
@@ -49,7 +51,7 @@ export const isOwner = async (req: express.Request, res: express.Response, next:
 
         next();
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         return res.sendStatus(400);
     }
 };
