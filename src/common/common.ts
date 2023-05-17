@@ -6,24 +6,29 @@ import { Document } from "mongodb"
  * @Autor: xuhanfeng
  * @Date: 2023-05-16 19:21:43
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 16:31:59
+ * @LastEditTime: 2023-05-17 20:37:00
  */
 export interface Page {
     page: number
     limit: number
 };
 
-export class Result {
+export class PageResult {
+    code: number
+    msg: string
     total: number
     page: number
     limit: number
-    results: Document[]
+    result: Document
 };
 
-export interface Staff {
+export class Result {
+    code: number
+    msg: string
+    result: Document
+}
+
+export interface SortObj {
     id: string
-    code: string
-    staffname: string
-    colorCode: string
     sort: number
 };

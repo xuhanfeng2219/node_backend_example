@@ -4,47 +4,55 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 17:57:23
+ * @LastEditTime: 2023-05-17 20:37:07
  */
 import express from 'express';
 
-import { Page , Result, Staff} from '../common/common';
+import { Page , PageResult, Result, SortObj} from '../common/common';
 import { logger } from '../common/log';
 import { getStaffByCode, createStaff, getStaffs, getStaffById, getStaffsCount, deleteStaffById, deleteStaffsByIds } from '../db/staffs';
-import { ObjectId } from 'mongodb';
 
 
 export const getAllStaffs = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
-        const staffs = await getStaffs();
-
-        return res.status(200).json(staffs).end();
+        result.result = await getStaffs();
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result).end();
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400).json({error: error.message});
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
 
 export const getStaffsByPage = async (req: express.Request, res: express.Response) => {
+    const result = new PageResult();
     try {
         const query: Page = req.body;
         const page = query.page === 0 ? 1 : query.page;
         const limit = query.limit === 0 ? 10 : query.limit;
         const total = await getStaffsCount();
         const staffs = await getStaffs().skip((page - 1)*limit).limit(limit);
-        const result = new Result();
-        result.results = staffs;
+        result.result = staffs;
         result.total = total;
         result.page = page;
         result.limit = limit;
+        result.code = 200;
+        result.msg = "success";
         return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400).json({error: error.message});
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
 
 export const createdStaff = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
         const { filename, path } = req.file;
         const { 
@@ -96,7 +104,7 @@ export const createdStaff = async (req: express.Request, res: express.Response) 
         }
         const total = await getStaffsCount();
         
-        const staff = await createStaff({
+        result.result = await createStaff({
             code,
             nickname,
             staffname,
@@ -136,40 +144,53 @@ export const createdStaff = async (req: express.Request, res: express.Response) 
             updateDate,
             status
         });
-
-        return res.status(200).json(staff).end();
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result).end();
         
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400).json({error: error.message});
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
 
 export const deleteStaff = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
         const { id } = req.params;
 
-        const deleteSatff = await deleteStaffById(id);
-
-        return res.status(200).json(deleteSatff); 
+        result.result = await deleteStaffById(id);
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result); 
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400).json({error: error.message});
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
 
 export const deleteStaffs = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
         const { ids } = req.body;
-        const staffs = await deleteStaffsByIds(ids);
-        return res.status(200).json(staffs); 
+        result.result = await deleteStaffsByIds(ids);
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result); 
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400).json({error: error.message});
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
 
 export const updateStaff = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
         const { id } = req.params;
         const { 
@@ -256,31 +277,36 @@ export const updateStaff = async (req: express.Request, res: express.Response) =
         staff.status = status;
         
         await staff.save();
-
-        return res.status(200).json(staff).end();
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result).end();
 
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400).json({error: error.message});
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
 
 export const sortStaff = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
         const { list } = req.body;
-        const staffs = list as Array<Staff>;
+        const staffs = list as Array<SortObj>;
         for (const staff of staffs) {
             const stf = await getStaffById(staff.id);
-            stf.code = staff.code;
-            stf.staffname = staff.staffname;
-            stf.colorCode = staff.colorCode;
             stf.sort = staff.sort;
-            await stf.save();
+            await stf.save() as SortObj;
         }
-        return res.status(200);
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result);
 
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400).json({error: error.message});
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };

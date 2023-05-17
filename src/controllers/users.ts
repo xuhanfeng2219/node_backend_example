@@ -4,63 +4,78 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-16 20:41:39
+ * @LastEditTime: 2023-05-17 20:43:49
  */
 import express from 'express';
 
 import { getUsers, deleteUserById, getUserById, getUserByUsername, getUsersCount } from '../db/users';
-import { Page , Result} from '../common/common';
+import { Page , PageResult, Result} from '../common/common';
 import { logger } from '../common/log';
 
 export const getAllUsers = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
-        const users = await getUsers();
-
-        return res.status(200).json(users);
+        result.result = await getUsers();
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400);
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
 
 export const getUsersByPage = async (req: express.Request, res: express.Response) => {
+    const result = new PageResult();
     try {
         const query: Page = req.body;
         const page = query.page === 0 ? 1 : query.page;
         const limit = query.limit === 0 ? 10 : query.limit;
         const total = await getUsersCount();
         const users = await getUsers().skip((page - 1)*limit).limit(limit);
-        const result = new Result();
-        result.results = users;
+        result.result = users;
         result.total = total;
         result.page = page;
         result.limit = limit;
+        result.code = 200;
+        result.msg = "success";
         return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400);
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
 
 export const deleteUser = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
         const { id } = req.params;
 
-        const deleteUser = await deleteUserById(id);
-
-        return res.status(200).json(deleteUser); 
+        result.result = await deleteUserById(id);
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result); 
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400);
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
 
 export const updateUser = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
         const { id } = req.params;
         const { username } = req.body;
         if (!username) {
-            return res.sendStatus(400);
+            result.code = 400;
+            result.msg = "用户名不能为空！";
+            return res.status(400).json(result);
         }
 
         const user = await getUserById(id);
@@ -68,15 +83,20 @@ export const updateUser = async (req: express.Request, res: express.Response) =>
         const isexistUsername = await getUserByUsername(username);
 
         if (isexistUsername) {
-            return res.status(400).json({msg : '该用户名已存在！'});
+            result.code = 400;
+            result.msg = "该用户名已存在！";
+            return res.status(400).json(result);
         }
         user.username = username;
         await user.save();
-
-        return res.status(200).json(user).end();
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result).end();
 
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400);
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };

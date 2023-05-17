@@ -4,31 +4,37 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:16:05
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 13:55:50
+ * @LastEditTime: 2023-05-17 20:26:18
  */
 import express from 'express';
 
 import { getUserByUsername, createUser, getUserByEmail } from '../db/users';
 import { random, authentication } from '../helpers';
 import { logger } from '../common/log';
+import { Result } from '../common/common';
 
 export const register = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
         const { password, username, email, role } = req.body;
 
         if (!password || !username || !email) {
-            return res.sendStatus(400);
+            result.code = 400;
+            result.msg = "缺少必填项！"
+            return res.sendStatus(400).json(result);
         }
 
         const existingUser = await getUserByUsername(username) || await getUserByEmail(email);
 
         if (existingUser) {
-            return res.sendStatus(400).json({msg : "该用户已存在！"});
+            result.code = 400;
+            result.msg = "该用户已存在！";
+            return res.sendStatus(400).json(result);
         }
 
         const salt = random;
 
-        const user = await createUser({
+        await createUser({
             username,
             email,
             authentication: {
@@ -37,33 +43,43 @@ export const register = async (req: express.Request, res: express.Response) => {
             },
             role,
         });
-
-        return res.status(200).json(user).end();
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result).end();
         
     } catch (error) {
         logger.error(error);
-        return res.sendStatus(400);
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
 
 export const login = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
     try {
         const {username, password} = req.body;
 
         if (!username || !password) {
-            return res.sendStatus(400);
+            result.code = 400;
+            result.msg = "缺少必填项！"
+            return res.sendStatus(400).json(result);
         }
 
         const user = await getUserByUsername(username).select('+authentication.salt +authentication.password');
 
         if (!user) {
-            return res.sendStatus(400);
+            result.code = 400;
+            result.msg = "该用户不存在！"
+            return res.sendStatus(400).json(result);
         }
 
         const exceptHash = await authentication(user.authentication.salt, password);
 
         if (user.authentication.password !== exceptHash) {
-            return res.sendStatus(403);
+            result.code = 403;
+            result.msg = "密码不对！"
+            return res.sendStatus(403).json(result);
         }
 
         const salt = random;
@@ -73,10 +89,14 @@ export const login = async (req: express.Request, res: express.Response) => {
         //  this domain need to changed when we push to the aws
         res.cookie('XUHANFENG-AUTH', user.authentication.sessionToken, { domain: 'localhost', path: '/' });
 
-        return res.status(200).json(user).end();
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result).end();
          
     } catch (error) {
-        console.error(error);
-        return res.sendStatus(400);
+        logger.error(error);
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
     }
 };
