@@ -4,16 +4,17 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:16:05
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-16 17:40:27
+ * @LastEditTime: 2023-05-17 10:16:50
  */
 import express from 'express';
 
 import { getUserByUsername, createUser, getUserByEmail } from '../db/users';
 import { random, authentication } from '../helpers';
+import { logger } from 'common/log';
 
 export const register = async (req: express.Request, res: express.Response) => {
     try {
-        const { password, username, email } = req.body;
+        const { password, username, email, role } = req.body;
 
         if (!password || !username || !email) {
             return res.sendStatus(400);
@@ -22,7 +23,7 @@ export const register = async (req: express.Request, res: express.Response) => {
         const existingUser = await getUserByUsername(username) || await getUserByEmail(email);
 
         if (existingUser) {
-            return res.sendStatus(400);
+            return res.sendStatus(400).json({msg : "该用户已存在！"});
         }
 
         const salt = random;
@@ -34,12 +35,13 @@ export const register = async (req: express.Request, res: express.Response) => {
                 salt,
                 password: authentication(salt, password),
             },
+            role,
         });
 
         return res.status(200).json(user).end();
         
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         return res.sendStatus(400);
     }
 };
