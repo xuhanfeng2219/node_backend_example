@@ -6,7 +6,7 @@ import { Document } from "mongodb"
  * @Autor: xuhanfeng
  * @Date: 2023-05-16 19:21:43
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 20:37:00
+ * @LastEditTime: 2023-05-18 15:00:23
  */
 export interface Page {
     page: number
@@ -28,7 +28,8 @@ export class Result {
     result: Document
 }
 
-export interface SortObj {
+export interface Condition {
     id: string
     sort: number
+    isDisplay: string
 };

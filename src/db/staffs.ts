@@ -4,10 +4,9 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 19:56:02
+ * @LastEditTime: 2023-05-18 14:47:46
  */
-import { logger } from "../common/log";
-import mongoose, { Error } from "mongoose";
+import mongoose from "mongoose";
 import multer from "multer";
 
 const StaffSchema = new mongoose.Schema({
@@ -54,12 +53,13 @@ const StaffSchema = new mongoose.Schema({
     updateDate: {type: Date, default: Date.now()},
     status: {type: String}
 });
+StaffSchema.index({staffname: 'text', email: 'text', mobile: 'text'});
 
 export const StaffModel = mongoose.model('Staff', StaffSchema);
 
 export const getStaffs = () => StaffModel.find().sort({sort: 1});
 export const getStaffsCount = () => StaffModel.count();
-export const getStaffByStaffname = (staffname: string) => StaffModel.findOne( {staffname});
+export const getStaffByStaffname = (staffname: string) => StaffModel.find( {$text: {$search: staffname}});
 export const getStaffByCode = (code: string) => StaffModel.findOne( {code});
 export const getStaffById = (id: string) => StaffModel.findById({_id: id});
 export const createStaff = (values: Record<string, any>) => new StaffModel(values).save().then((staff) => staff.toObject());
@@ -67,4 +67,4 @@ export const deleteStaffById = (id: string) => StaffModel.findOneAndDelete({_id:
 export const deleteStaffsByIds = (ids: string[]) => StaffModel.deleteMany({_id: {$in: ids}});
 export const updateStaffById = (id: string, values: Record<string, any>) => StaffModel.findByIdAndUpdate(id, values); 
 
-export const upload = multer({dest: 'uploads/'});
+export const upload = multer({dest: 'uploads/staff/'});

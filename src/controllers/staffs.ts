@@ -4,19 +4,35 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 20:37:07
+ * @LastEditTime: 2023-05-18 15:01:00
  */
 import express from 'express';
 
-import { Page , PageResult, Result, SortObj} from '../common/common';
+import { Page , PageResult, Result, Condition} from '../common/common';
 import { logger } from '../common/log';
-import { getStaffByCode, createStaff, getStaffs, getStaffById, getStaffsCount, deleteStaffById, deleteStaffsByIds } from '../db/staffs';
+import { getStaffByCode, createStaff, getStaffs, getStaffById, getStaffsCount, deleteStaffById, deleteStaffsByIds, getStaffByStaffname } from '../db/staffs';
 
 
 export const getAllStaffs = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
         result.result = await getStaffs();
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result).end();
+    } catch (error) {
+        logger.error(error);
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
+    }
+};
+
+export const getStaffsByStaffname = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
+    try {
+        const { staffname } = req.params;
+        result.result = await getStaffByStaffname(staffname);
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
@@ -293,11 +309,33 @@ export const sortStaff = async (req: express.Request, res: express.Response) => 
     const result = new Result();
     try {
         const { list } = req.body;
-        const staffs = list as Array<SortObj>;
+        const staffs = list as Array<Condition>;
         for (const staff of staffs) {
             const stf = await getStaffById(staff.id);
             stf.sort = staff.sort;
-            await stf.save() as SortObj;
+            await stf.save() as Condition;
+        }
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result);
+
+    } catch (error) {
+        logger.error(error);
+        result.code = 400;
+        result.msg = "fail";
+        return res.sendStatus(400).json(result);
+    }
+};
+
+export const displayStaff = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
+    try {
+        const { list } = req.body;
+        const staffs = list as Array<Condition>;
+        for (const staff of staffs) {
+            const stf = await getStaffById(staff.id);
+            stf.isDisplay = staff.isDisplay;
+            await stf.save() as Condition;
         }
         result.code = 200;
         result.msg = "success";
