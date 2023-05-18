@@ -1,0 +1,2 @@
+code,salutation,firstname,lastname,joinDate,customerGroup,membershipNo,consultant,ICNo,gender,birthday,race,religion,nationality,maritalStatus,occupation,mobile,homeTelephone,officeTelephone,otherTelephone,fax,email,address,city,state,postCode,country,contactPreference,notes,notes2,loyaltyPoint
+2,Ms.,Eva,Lim,15/11/2011,VIP,1.00E+12,Joey,S72,F,18/11/1987,Chinese,Chistian,Singaporean,S,Teacher,3476,792,,,,ev@sample.com,Blk 333 Ang Mo Kio Ave 5 #07-123,,,560333,Singaporean,,This is Example Customer data,,150

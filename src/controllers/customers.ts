@@ -4,14 +4,14 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-18 15:14:58
+ * @LastEditTime: 2023-05-18 21:01:31
  */
 import express from 'express';
 
-import { Page , PageResult, Result, Condition } from '../common/common';
+import { Page , PageResult, Result, Condition, Customer, parseDate, convertDateFormat } from '../common/common';
 import { logger } from '../common/log';
-import { getCustomersCount, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, getCustomersByCode } from '../db/customers';
-import csvParser from 'csv-parser';
+import { getCustomersCount, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, getCustomersByCode, createCustomers } from '../db/customers';
+import csv from 'csvtojson';
 
 
 export const getAllCustomers = async (req: express.Request, res: express.Response) => {
@@ -98,6 +98,7 @@ export const createdCustomer = async (req: express.Request, res: express.Respons
         }
         
         const existCustomer = await getCustomerByMobile(mobile) || await getCustomerByICNo(ICNo);
+        logger.info(`Customer:`, existCustomer);
         if (existCustomer) {
             result.code = 400;
             result.msg = "该客户已存在!";
@@ -136,8 +137,8 @@ export const createdCustomer = async (req: express.Request, res: express.Respons
             notes,
             notes2,
             loyaltyPoint,
-            createDate,
-            updateDate,
+            createDate: convertDateFormat(new Date()),
+            updateDate: convertDateFormat(new Date()),
             isDisplay
         });
         result.code = 200;
@@ -279,8 +280,8 @@ export const updateCustomer = async (req: express.Request, res: express.Response
         customer.notes =  notes;
         customer.notes2 =  notes2;
         customer.loyaltyPoint =  loyaltyPoint;
-        customer.createDate =  createDate;
-        customer.updateDate =  new Date();
+        customer.createDate =  convertDateFormat(new Date(createDate));
+        customer.updateDate =  convertDateFormat(new Date());
         customer.isDisplay =  isDisplay;
         await customer.save();
 
@@ -299,62 +300,41 @@ export const updateCustomer = async (req: express.Request, res: express.Response
 export const importCustomers = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
-        const fileBuffer = req.file?.buffer;
-
-        if (!fileBuffer) {
+        const {filename, path}  = req.file;
+        if (!filename) {
             result.code = 400;
             result.msg = "未提供csv文件!";
             return res.status(400).json(result);
         }
-
-        csvParser().on('data',async (data: any) => {
+        // const customers: Customer[] = []; 
+        csv()
+            .fromFile(path)
+            .then(async (data: any) => {
             try {
-                const customer = await createCustomer({
-                                        code: data.code,
-                                        salutation: data.salutation,
-                                        firstname: data.firstname,
-                                        lastname: data.lastname,
-                                        joinDate: data.joinDate,
-                                        customerGroup: data.customerGroup,
-                                        membershipNo: data.membershipNo,
-                                        consultant: data.consultant,
-                                        ICNo: data.ICNo,
-                                        gender: data.gender,
-                                        birthday: data.birthday,
-                                        race: data.race,
-                                        religion: data.religion,
-                                        nationality: data.nationality,
-                                        maritalStatus: data.maritalStatus,
-                                        occupation: data.occupation,
-                                        mobile: data.mobile,
-                                        homeTelephone: data.homeTelephone,
-                                        officeTelephone: data.officeTelephone,
-                                        otherTelephone: data.otherTelephone,
-                                        fax: data.fax,
-                                        email: data.email,
-                                        address: data.address,
-                                        city: data.city,
-                                        state: data.state,
-                                        postCode: data.postCode,
-                                        country: data.country,
-                                        contactPreference: data.contactPreference,
-                                        notes: data.notes,
-                                        notes2: data.notes2,
-                                        loyaltyPoint: data.loyaltyPoint,
-                                        createDate: data.createDate,
-                                        updateDate: data.updateDate,
-                                        isDisplay: data.isDisplay
-                })
+                const isExist = await getCustomerByICNo(data.ICNo) || await getCustomerByMobile(data.mobile);
+                if (isExist) {
+                    result.code = 400;
+                    result.msg = "客户已存在!";
+                    return res.status(400).json(result);
+                }
+                const customers: Customer[] = data;
+                for (const customer of customers) {
+                    if (customer.birthday) {
+                        customer.birthday = parseDate(customer.birthday.toString());
+                    }
+                    if (customer.joinDate) {
+                        customer.joinDate = parseDate(customer.joinDate.toString());
+                    }
+                }
+                result.result = await createCustomers(customers);
+                
             } catch (error) {
                 logger.error('插入数据到 MongoDB 时发生错误:', error);
+                result.code = 400;
+                result.msg = error.message;
+                return res.status(400).json(result);
             }
-        }).on('end', () => {
-            // res.json(result);
-          })
-          .on('error', (err: Error) => {
-            logger.error('解析 CSV 文件时发生错误:', err);
-            return res.status(500).json(result);
-          }).write(fileBuffer);
+        });
         
         result.code = 200;
         result.msg = "success";
@@ -376,6 +356,7 @@ export const displayCustomers = async (req: express.Request, res: express.Respon
         for (const customer of customers) {
             const c = await getCustomerById(customer.id);
             c.isDisplay = customer.isDisplay;
+            c.updateDate = new Date();
             await c.save();
         }
         result.code = 200;

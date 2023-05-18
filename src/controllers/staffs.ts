@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-18 15:01:00
+ * @LastEditTime: 2023-05-18 16:10:16
  */
 import express from 'express';
 
@@ -32,7 +32,9 @@ export const getStaffsByStaffname = async (req: express.Request, res: express.Re
     const result = new Result();
     try {
         const { staffname } = req.params;
-        result.result = await getStaffByStaffname(staffname);
+        const regex = new RegExp(staffname, 'i');
+        const query = { name: { $regex: regex } };
+        result.result = await getStaffByStaffname(query);
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
@@ -313,6 +315,7 @@ export const sortStaff = async (req: express.Request, res: express.Response) => 
         for (const staff of staffs) {
             const stf = await getStaffById(staff.id);
             stf.sort = staff.sort;
+            stf.updateDate = new Date();
             await stf.save() as Condition;
         }
         result.code = 200;
@@ -335,6 +338,7 @@ export const displayStaff = async (req: express.Request, res: express.Response) 
         for (const staff of staffs) {
             const stf = await getStaffById(staff.id);
             stf.isDisplay = staff.isDisplay;
+            stf.updateDate = new Date();
             await stf.save() as Condition;
         }
         result.code = 200;
