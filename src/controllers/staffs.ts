@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 15:39:45
+ * @LastEditTime: 2023-05-19 17:30:01
  */
 import express from 'express';
 
@@ -320,9 +320,11 @@ export const sortStaff = async (req: express.Request, res: express.Response) => 
         const staffs = list as Array<Condition>;
         for (const staff of staffs) {
             const stf = await getStaffById(staff.id);
-            stf.sort = staff.sort;
-            stf.updateDate = convertDateFormat(new Date());;
-            await stf.save();
+            if (stf !== null && stf !== undefined && Object.keys(stf).length > 0) {
+                stf.sort = staff.sort;
+                stf.updateDate = convertDateFormat(new Date());;
+                await stf.save();
+            }
         }
         result.code = 200;
         result.msg = "success";
@@ -343,9 +345,11 @@ export const displayStaff = async (req: express.Request, res: express.Response) 
         const staffs = list as Array<Condition>;
         for (const staff of staffs) {
             const stf = await getStaffById(staff.id);
-            stf.isDisplay = staff.isDisplay;
-            stf.updateDate = convertDateFormat(new Date());;
-            await stf.save();
+            if (stf !== null && stf !== undefined && Object.keys(stf).length > 0) {
+                stf.isDisplay = staff.isDisplay;
+                stf.updateDate = convertDateFormat(new Date());;
+                await stf.save();
+            }
         }
         result.code = 200;
         result.msg = "success";

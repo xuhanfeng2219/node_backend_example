@@ -4,19 +4,19 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 17:29:03
+ * @LastEditTime: 2023-05-19 17:45:27
  */
 import express from 'express';
 
-import { Page , PageResult, Result, Condition, convertDateFormat} from '../common/common';
+import { Page , PageResult, Result, Condition, convertDateFormat, Matching, matchServices} from '../common/common';
 import { logger } from '../common/log';
-import { getServicesCountByCondition,getServiceByCode, createService, getServices, getServiceById, getServicesCount, deleteServiceById, deleteServicesByIds, getServiceByCondition } from '../db/services';
+import { getMatchingsCountByCondition,getMatchingByCode, createMatching, getMatchings, getMatchingById, getMatchingsCount, deleteMatchingById, deleteMatchingsByIds, getMatchingByCondition } from '../db/matchings';
 
-
-export const getAllServices = async (req: express.Request, res: express.Response) => {
+export const getAllMatchings = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
-        result.result = await getServices();
+        const matchings  = await getMatchings() as unknown as Array<Matching>;
+        result.result = await matchServices(matchings);
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
@@ -28,7 +28,7 @@ export const getAllServices = async (req: express.Request, res: express.Response
     }
 };
 
-export const getServicesByCondition = async (req: express.Request, res: express.Response) => {
+export const getMatchingsByCondition = async (req: express.Request, res: express.Response) => {
     const result = new PageResult();
     try {
         const { condition } = req.params;
@@ -36,8 +36,9 @@ export const getServicesByCondition = async (req: express.Request, res: express.
         const query: Page = req.body;
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
-        const total = await getServicesCountByCondition(reg);
-        result.result = await getServiceByCondition(reg).skip((page-1)*limit).limit(limit);
+        const total = await getMatchingsCountByCondition(reg);
+        const matchings = await getMatchingByCondition(reg).skip((page - 1) * limit).limit(limit) as unknown as Array<Matching>;
+        result.result = await matchServices(matchings);
         result.total = total;
         result.page = page;
         result.limit = limit;
@@ -52,15 +53,15 @@ export const getServicesByCondition = async (req: express.Request, res: express.
     }
 };
 
-export const getServicesByPage = async (req: express.Request, res: express.Response) => {
+export const getMatchingsByPage = async (req: express.Request, res: express.Response) => {
     const result = new PageResult();
     try {
         const query: Page = req.body;
-        const page = query.page === 0 ? 1 : query.page;
-        const limit = query.limit === 0 ? 10 : query.limit;
-        const total = await getServicesCount();
-        const Services = await getServices().skip((page - 1)*limit).limit(limit);
-        result.result = Services;
+        const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
+        const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
+        const total = await getMatchingsCount();
+        const matchings = await getMatchings().skip((page - 1) * limit).limit(limit) as unknown as Array<Matching>;
+        result.result = await matchServices(matchings);
         result.total = total;
         result.page = page;
         result.limit = limit;
@@ -75,13 +76,13 @@ export const getServicesByPage = async (req: express.Request, res: express.Respo
     }
 };
 
-export const createdService = async (req: express.Request, res: express.Response) => {
+export const createdMatching = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
         // const { filename, path } = req.file;
         const { 
             code,
-            servicename,
+            matchingname,
             category,
             group,
             cost,
@@ -99,23 +100,24 @@ export const createdService = async (req: express.Request, res: express.Response
             status,
             image,
             note, 
+            serviceIds
         } = req.body;
-        if (!code || !servicename) {
+        if (!code || !matchingname) {
             result.code = 400;
             result.msg = "请填写必填项!";
             return res.status(400).json(result);
         }
         
-        const existCode = await getServiceByCode(code);
+        const existCode = await getMatchingByCode(code);
         if (existCode) {
             result.code = 400;
             result.msg = "该code已存在！";
             return res.status(400).json(result);
         }
         
-        result.result = await createService({
+        result.result = await createMatching({
             code,
-            servicename,
+            matchingname,
             category,
             group,
             cost,
@@ -132,7 +134,8 @@ export const createdService = async (req: express.Request, res: express.Response
             updateDate: convertDateFormat(new Date()),
             status,
             image,
-            note
+            note,
+            serviceIds
         });
         result.code = 200;
         result.msg = "success";
@@ -146,11 +149,11 @@ export const createdService = async (req: express.Request, res: express.Response
     }
 };
 
-export const deleteService = async (req: express.Request, res: express.Response) => {
+export const deleteMatching = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
         const { id } = req.params;
-        result.result = await deleteServiceById(id);
+        result.result = await deleteMatchingById(id);
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result); 
@@ -162,11 +165,11 @@ export const deleteService = async (req: express.Request, res: express.Response)
     }
 };
 
-export const deleteServices = async (req: express.Request, res: express.Response) => {
+export const deleteMatchings = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
         const { ids } = req.body;
-        result.result = await deleteServicesByIds(ids);
+        result.result = await deleteMatchingsByIds(ids);
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result); 
@@ -178,13 +181,13 @@ export const deleteServices = async (req: express.Request, res: express.Response
     }
 };
 
-export const updateService = async (req: express.Request, res: express.Response) => {
+export const updateMatching = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
         const { id } = req.params;
         const { 
             code,
-            servicename,
+            matchingname,
             category,
             group,
             cost,
@@ -201,36 +204,38 @@ export const updateService = async (req: express.Request, res: express.Response)
             updateDate,
             status,
             image,
-            note
+            note,
+            serviceIds,
          } = req.body;
-        if (!code || !servicename) {
+        if (!code || !matchingname) {
             result.code = 400;
             result.msg = "请填写必填项!";
             return res.status(400).json(result);
         }
 
-        const service = await getServiceById(id);
-        service.code = code;
-        service.servicename = servicename;
-        service.category = category;
-        service.group = group;
-        service.cost = cost;
-        service.price = price;
-        service.quantity = quantity;
-        service.lowestPrice = lowestPrice;
-        service.discount = discount;
-        service.handletime = handletime;
-        service.usedays = usedays;
-        service.isDonate = isDonate;
-        service.isFavorite = isFavorite; 
-        service.isDisplay = isDisplay;
-        service.createDate = createDate;
-        service.updateDate = convertDateFormat(new Date());
-        service.status = status;
-        service.image = image;
-        service.note = note;
+        const matching = await getMatchingById(id);
+        matching.code = code;
+        matching.matchingname = matchingname;
+        matching.category = category;
+        matching.group = group;
+        matching.cost = cost;
+        matching.price = price;
+        matching.quantity = quantity;
+        matching.lowestPrice = lowestPrice;
+        matching.discount = discount;
+        matching.handletime = handletime;
+        matching.usedays = usedays;
+        matching.isDonate = isDonate;
+        matching.isFavorite = isFavorite; 
+        matching.isDisplay = isDisplay;
+        matching.createDate = createDate;
+        matching.updateDate = convertDateFormat(new Date());
+        matching.status = status;
+        matching.image = image;
+        matching.note = note;
+        matching.serviceIds = serviceIds;
         
-        await service.save();
+        await matching.save();
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
@@ -243,16 +248,16 @@ export const updateService = async (req: express.Request, res: express.Response)
     }
 };
 
-export const displayService = async (req: express.Request, res: express.Response) => {
+export const displayMatching = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
         const { list } = req.body;
-        const services = list as Array<Condition>;
-        for (const service of services) {
-            const s = await getServiceById(service.id);
-            if (s !== null && s !== undefined && Object.keys(s).length > 0) {
-                s.isDisplay = service.isDisplay;
-                s.updateDate = convertDateFormat(new Date());;
+        const matchings = list as Array<Condition>;
+        for (const matching of matchings) {
+            const s = await getMatchingById(matching.id);
+            if (s !== null && Object.keys(s).length > 0 && s !== undefined) {
+                s.isDisplay = matching.isDisplay;
+                s.updateDate = convertDateFormat(new Date());
                 await s.save();
             }
         }
@@ -268,16 +273,16 @@ export const displayService = async (req: express.Request, res: express.Response
     }
 };
 
-export const favoriteService = async (req: express.Request, res: express.Response) => {
+export const favoriteMatching = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
         const { list } = req.body;
-        const services = list as Array<Condition>;
-        for (const service of services) {
-            const s = await getServiceById(service.id);
-            if (s !== null && s !== undefined && Object.keys(s).length > 0) {
-                s.isFavorite = service.isFavorite;
-                s.updateDate = convertDateFormat(new Date());;
+        const matchings = list as Array<Condition>;
+        for (const matching of matchings) {
+            const s = await getMatchingById(matching.id);
+            if (s !== null && Object.keys(s).length > 0 && s !== undefined) {
+                s.isFavorite = matching.isFavorite;
+                s.updateDate = convertDateFormat(new Date());
                 await s.save();
             }
         }

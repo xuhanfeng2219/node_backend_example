@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 15:38:56
+ * @LastEditTime: 2023-05-19 17:31:11
  */
 import express from 'express';
 
@@ -364,9 +364,11 @@ export const displayCustomers = async (req: express.Request, res: express.Respon
         const customers = list as Array<Condition>;
         for (const customer of customers) {
             const c = await getCustomerById(customer.id);
-            c.isDisplay = customer.isDisplay;
-            c.updateDate = convertDateFormat(new Date());
-            await c.save();
+            if (c !== null && c !== undefined && Object.keys(c).length > 0) {
+                c.isDisplay = customer.isDisplay;
+                c.updateDate = convertDateFormat(new Date());
+                await c.save();
+            }
         }
         result.code = 200;
         result.msg = "success";

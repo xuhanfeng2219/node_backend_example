@@ -1,5 +1,6 @@
 import { Document } from "mongodb"
 import { logger } from "./log"
+import { getServiceByIds } from "../db/services"
 
 /*
  * @Description: 
@@ -7,7 +8,7 @@ import { logger } from "./log"
  * @Autor: xuhanfeng
  * @Date: 2023-05-16 19:21:43
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 14:17:25
+ * @LastEditTime: 2023-05-19 17:43:17
  */
 export interface Page {
     page: number
@@ -71,6 +72,85 @@ export class Customer {
     createdate:Date
     updatedate:Date
     isDisplay:string
+}
+
+export class Service {
+    code: string
+    servicename: string
+    category: string 
+    group: string 
+    cost: number
+    price: number 
+    quantity: number 
+    lowestPrice: number 
+    discount: number 
+    handletime: number 
+    usedays: number 
+    isDonate: string
+    isFavorite: string
+    isDisplay: string
+    createDate: Date
+    updateDate: Date
+    status: string
+    image: string
+    note: string
+}
+
+export class Matching {
+    _id: string
+    code: string
+    matchingname: string
+    category: string 
+    group: string 
+    cost: number
+    price: number 
+    quantity: number 
+    lowestPrice: number 
+    discount: number 
+    handletime: number 
+    usedays: number 
+    isDonate: string
+    isFavorite: string
+    isDisplay: string
+    createDate: Date
+    updateDate: Date
+    status: string
+    image: string
+    note: string
+    serviceIds: Array<string>
+    services: Array<Service>
+}
+
+export async function matchServices(matchings: Array<Matching>): Promise<Array<Matching>> {
+    const mathes = new Array<Matching>;
+    for (const match of matchings) {
+        const mth = new Matching();
+        const serviceIds = match.serviceIds;
+        const services = await getServiceByIds(serviceIds) as Array<Service>;
+        mth._id=match._id;
+        mth.code=match.code;
+        mth.matchingname=match.matchingname;
+        mth.category=match.category;
+        mth.group=match.group;
+        mth.cost=match.cost;
+        mth.price=match.price;
+        mth.quantity=match.quantity;
+        mth.lowestPrice=match.lowestPrice;
+        mth.discount=match.discount;
+        mth.handletime=match.handletime;
+        mth.usedays=match.usedays;
+        mth.isDonate=match.isDonate;
+        mth.isFavorite=match.isFavorite;
+        mth.isDisplay=match.isDisplay;
+        mth.createDate=match.createDate;
+        mth.updateDate=match.updateDate;
+        mth.status=match.status;
+        mth.image=match.image;
+        mth.note=match.note;
+        mth.services=services;
+        mathes.push(mth);
+    }
+    return mathes;
 }
 
 export function parseDate(str: string): Date {
