@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 20:43:49
+ * @LastEditTime: 2023-05-19 15:40:38
  */
 import express from 'express';
 
@@ -23,7 +23,7 @@ export const getAllUsers = async (req: express.Request, res: express.Response) =
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -31,8 +31,8 @@ export const getUsersByPage = async (req: express.Request, res: express.Response
     const result = new PageResult();
     try {
         const query: Page = req.body;
-        const page = query.page === 0 ? 1 : query.page;
-        const limit = query.limit === 0 ? 10 : query.limit;
+        const page = query.page === 0 || Object.keys(query).length === 0? 1 : query.page;
+        const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getUsersCount();
         const users = await getUsers().skip((page - 1)*limit).limit(limit);
         result.result = users;
@@ -46,7 +46,7 @@ export const getUsersByPage = async (req: express.Request, res: express.Response
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -63,7 +63,7 @@ export const deleteUser = async (req: express.Request, res: express.Response) =>
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -97,6 +97,6 @@ export const updateUser = async (req: express.Request, res: express.Response) =>
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };

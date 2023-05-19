@@ -4,9 +4,10 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 09:57:36
+ * @LastEditTime: 2023-05-19 15:42:32
  */
 import mongoose from "mongoose";
+import { convertDateFormat } from "../common/common";
 
 const UserSchema = new mongoose.Schema({
     username: { type: String, required: true},
@@ -16,7 +17,9 @@ const UserSchema = new mongoose.Schema({
         salt: { type: String, select: false },
         sessionToken: { type: String, select: false}
     },
-    role: { type: String }
+    role: { type: String },
+    createDate: { type: Date, default: convertDateFormat(new Date()) },
+    updateDate: { type: Date, default: convertDateFormat(new Date()) },
 });
 
 export const UserModel = mongoose.model('User', UserSchema);

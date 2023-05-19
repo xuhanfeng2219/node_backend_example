@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 10:38:30
+ * @LastEditTime: 2023-05-19 15:38:56
  */
 import express from 'express';
 
@@ -25,7 +25,7 @@ export const getAllCustomers = async (req: express.Request, res: express.Respons
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -33,8 +33,8 @@ export const getCustomersByPage = async (req: express.Request, res: express.Resp
     const result = new PageResult();
     try {
         const query: Page = req.body;
-        const page = query.page === 0 ? 1 : query.page;
-        const limit = query.limit === 0 ? 10 : query.limit;
+        const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
+        const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getCustomersCount();
         const staffs = await getCustomers().skip((page - 1)*limit).limit(limit);
         result.result = staffs;
@@ -48,7 +48,7 @@ export const getCustomersByPage = async (req: express.Request, res: express.Resp
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -149,7 +149,7 @@ export const createdCustomer = async (req: express.Request, res: express.Respons
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -165,7 +165,7 @@ export const deleteCustomer = async (req: express.Request, res: express.Response
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -181,7 +181,7 @@ export const deleteCustomers = async (req: express.Request, res: express.Respons
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -190,8 +190,8 @@ export const getCustomersByCondition = async (req: express.Request, res: express
     try {
         const { condition } = req.params;
         const query: Page = req.body;
-        const page = query.page === 0 ? 1 : query.page;
-        const limit = query.limit === 0 ? 10 : query.limit;
+        const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
+        const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const reg = new RegExp(condition.trim(), 'i');
         const total = await getCustomersCountByCondition(reg);
         const customers = await queryCustomersByCondition(reg).skip((page - 1)*limit).limit(limit);
@@ -206,7 +206,7 @@ export const getCustomersByCondition = async (req: express.Request, res: express
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -302,7 +302,7 @@ export const updateCustomer = async (req: express.Request, res: express.Response
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -353,7 +353,7 @@ export const importCustomers = async (req: express.Request, res: express.Respons
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -376,6 +376,6 @@ export const displayCustomers = async (req: express.Request, res: express.Respon
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };

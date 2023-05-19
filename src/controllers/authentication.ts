@@ -4,14 +4,14 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:16:05
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 20:26:18
+ * @LastEditTime: 2023-05-19 15:43:45
  */
 import express from 'express';
 
 import { getUserByUsername, createUser, getUserByEmail } from '../db/users';
 import { random, authentication } from '../helpers';
 import { logger } from '../common/log';
-import { Result } from '../common/common';
+import { Result, convertDateFormat } from '../common/common';
 
 export const register = async (req: express.Request, res: express.Response) => {
     const result = new Result();
@@ -21,7 +21,7 @@ export const register = async (req: express.Request, res: express.Response) => {
         if (!password || !username || !email) {
             result.code = 400;
             result.msg = "缺少必填项！"
-            return res.sendStatus(400).json(result);
+            return res.status(400).json(result);
         }
 
         const existingUser = await getUserByUsername(username) || await getUserByEmail(email);
@@ -29,7 +29,7 @@ export const register = async (req: express.Request, res: express.Response) => {
         if (existingUser) {
             result.code = 400;
             result.msg = "该用户已存在！";
-            return res.sendStatus(400).json(result);
+            return res.status(400).json(result);
         }
 
         const salt = random;
@@ -51,7 +51,7 @@ export const register = async (req: express.Request, res: express.Response) => {
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -63,7 +63,7 @@ export const login = async (req: express.Request, res: express.Response) => {
         if (!username || !password) {
             result.code = 400;
             result.msg = "缺少必填项！"
-            return res.sendStatus(400).json(result);
+            return res.status(400).json(result);
         }
 
         const user = await getUserByUsername(username).select('+authentication.salt +authentication.password');
@@ -71,7 +71,7 @@ export const login = async (req: express.Request, res: express.Response) => {
         if (!user) {
             result.code = 400;
             result.msg = "该用户不存在！"
-            return res.sendStatus(400).json(result);
+            return res.status(400).json(result);
         }
 
         const exceptHash = await authentication(user.authentication.salt, password);
@@ -79,11 +79,13 @@ export const login = async (req: express.Request, res: express.Response) => {
         if (user.authentication.password !== exceptHash) {
             result.code = 403;
             result.msg = "密码不对！"
-            return res.sendStatus(403).json(result);
+            return res.status(403).json(result);
         }
 
         const salt = random;
         user.authentication.sessionToken = authentication(salt, user._id.toString());
+        user.createDate = convertDateFormat(new Date());
+        user.updateDate = convertDateFormat(new Date());
         
         await user.save();
         //  this domain need to changed when we push to the aws
@@ -97,6 +99,6 @@ export const login = async (req: express.Request, res: express.Response) => {
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };

@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 10:36:36
+ * @LastEditTime: 2023-05-19 15:39:45
  */
 import express from 'express';
 
@@ -24,7 +24,7 @@ export const getAllStaffs = async (req: express.Request, res: express.Response) 
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -34,8 +34,8 @@ export const getStaffsByCondition = async (req: express.Request, res: express.Re
         const { condition } = req.params;
         const reg = new RegExp(condition.trim(),'i');
         const query: Page = req.body;
-        const page = query.page === 0 ? 1 : query.page;
-        const limit = query.limit === 0 ? 10 : query.limit;
+        const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
+        const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getStaffsCountByCondition(reg);
         result.result = await getStaffByCondition(reg).skip((page-1)*limit).limit(limit);
         result.total = total;
@@ -48,7 +48,7 @@ export const getStaffsByCondition = async (req: express.Request, res: express.Re
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -56,8 +56,8 @@ export const getStaffsByPage = async (req: express.Request, res: express.Respons
     const result = new PageResult();
     try {
         const query: Page = req.body;
-        const page = query.page === 0 ? 1 : query.page;
-        const limit = query.limit === 0 ? 10 : query.limit;
+        const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
+        const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getStaffsCount();
         const staffs = await getStaffs().skip((page - 1)*limit).limit(limit);
         result.result = staffs;
@@ -71,7 +71,7 @@ export const getStaffsByPage = async (req: express.Request, res: express.Respons
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -142,7 +142,7 @@ export const createdStaff = async (req: express.Request, res: express.Response) 
             startJobDate,
             endJobDate,
             endProbationDate,
-            image : `/uploads/${filename}`,
+            image : `/uploads/staffs/${filename}`,
             faith,
             isDisplay,
             mobile,
@@ -164,8 +164,8 @@ export const createdStaff = async (req: express.Request, res: express.Response) 
             colorCode,
             remark,
             sort: total + 1,
-            createDate,
-            updateDate,
+            createDate: convertDateFormat(new Date()),
+            updateDate: convertDateFormat(new Date()),
             status
         });
         result.code = 200;
@@ -176,7 +176,7 @@ export const createdStaff = async (req: express.Request, res: express.Response) 
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -193,7 +193,7 @@ export const deleteStaff = async (req: express.Request, res: express.Response) =
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -209,7 +209,7 @@ export const deleteStaffs = async (req: express.Request, res: express.Response) 
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -309,7 +309,7 @@ export const updateStaff = async (req: express.Request, res: express.Response) =
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -322,7 +322,7 @@ export const sortStaff = async (req: express.Request, res: express.Response) => 
             const stf = await getStaffById(staff.id);
             stf.sort = staff.sort;
             stf.updateDate = convertDateFormat(new Date());;
-            await stf.save() as Condition;
+            await stf.save();
         }
         result.code = 200;
         result.msg = "success";
@@ -332,7 +332,7 @@ export const sortStaff = async (req: express.Request, res: express.Response) => 
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
 
@@ -345,7 +345,7 @@ export const displayStaff = async (req: express.Request, res: express.Response) 
             const stf = await getStaffById(staff.id);
             stf.isDisplay = staff.isDisplay;
             stf.updateDate = convertDateFormat(new Date());;
-            await stf.save() as Condition;
+            await stf.save();
         }
         result.code = 200;
         result.msg = "success";
@@ -355,6 +355,6 @@ export const displayStaff = async (req: express.Request, res: express.Response) 
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
-        return res.sendStatus(400).json(result);
+        return res.status(400).json(result);
     }
 };
