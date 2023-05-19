@@ -4,12 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 10:35:50
+ * @LastEditTime: 2023-05-19 11:23:08
  */
 import mongoose from "mongoose";
 import multer from "multer";
 import { convertDateFormat } from "../common/common";
-import { register } from "controllers/authentication";
 
 const StaffSchema = new mongoose.Schema({
     // 概览
