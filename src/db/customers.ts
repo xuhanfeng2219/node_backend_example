@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-18 20:28:47
+ * @LastEditTime: 2023-05-19 10:37:41
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -57,7 +57,8 @@ export const CustomerModel = mongoose.model('Customer', CustomerSchema);
 
 export const getCustomers = () => CustomerModel.find();
 export const getCustomersCount = () => CustomerModel.count();
-export const getCustomersByCode = (code: string) => CustomerModel.find( {code});
+export const getCustomersCountByCondition = (reg: RegExp) => CustomerModel.count({$or:[{lastname: reg},{code: reg},{mobile: reg},{ICNo: reg}]});
+export const queryCustomersByCondition = (reg: RegExp) => CustomerModel.find({$or:[{lastname: reg},{code: reg},{mobile: reg},{ICNo: reg}]});
 export const getCustomerByMobile = (mobile: string) => CustomerModel.findOne({mobile: mobile});
 export const getCustomerByICNo = (icNo: string) => CustomerModel.findOne({ICNo: icNo});
 export const getCustomerById = (id: string) => CustomerModel.findById({_id: id});

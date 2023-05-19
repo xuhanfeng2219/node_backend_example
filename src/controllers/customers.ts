@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-18 21:01:31
+ * @LastEditTime: 2023-05-19 10:38:30
  */
 import express from 'express';
 
 import { Page , PageResult, Result, Condition, Customer, parseDate, convertDateFormat } from '../common/common';
 import { logger } from '../common/log';
-import { getCustomersCount, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, getCustomersByCode, createCustomers } from '../db/customers';
+import { getCustomersCountByCondition,getCustomersCount, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, queryCustomersByCondition, createCustomers } from '../db/customers';
 import csv from 'csvtojson';
 
 
@@ -186,13 +186,22 @@ export const deleteCustomers = async (req: express.Request, res: express.Respons
 };
 
 export const getCustomersByCondition = async (req: express.Request, res: express.Response) => {
-    const result = new Result();
+    const result = new PageResult();
     try {
         const { condition } = req.params;
-        result.result = await getCustomersByCode(condition);
+        const query: Page = req.body;
+        const page = query.page === 0 ? 1 : query.page;
+        const limit = query.limit === 0 ? 10 : query.limit;
+        const reg = new RegExp(condition.trim(), 'i');
+        const total = await getCustomersCountByCondition(reg);
+        const customers = await queryCustomersByCondition(reg).skip((page - 1)*limit).limit(limit);
+        result.result = customers;
+        result.total = total;
+        result.page = page;
+        result.limit = limit;
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result).end();
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -356,7 +365,7 @@ export const displayCustomers = async (req: express.Request, res: express.Respon
         for (const customer of customers) {
             const c = await getCustomerById(customer.id);
             c.isDisplay = customer.isDisplay;
-            c.updateDate = new Date();
+            c.updateDate = convertDateFormat(new Date());
             await c.save();
         }
         result.code = 200;

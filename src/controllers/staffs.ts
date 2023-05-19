@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-18 16:10:16
+ * @LastEditTime: 2023-05-19 10:36:36
  */
 import express from 'express';
 
-import { Page , PageResult, Result, Condition} from '../common/common';
+import { Page , PageResult, Result, Condition, convertDateFormat} from '../common/common';
 import { logger } from '../common/log';
-import { getStaffByCode, createStaff, getStaffs, getStaffById, getStaffsCount, deleteStaffById, deleteStaffsByIds, getStaffByStaffname } from '../db/staffs';
+import { getStaffsCountByCondition,getStaffByCode, createStaff, getStaffs, getStaffById, getStaffsCount, deleteStaffById, deleteStaffsByIds, getStaffByCondition } from '../db/staffs';
 
 
 export const getAllStaffs = async (req: express.Request, res: express.Response) => {
@@ -28,13 +28,19 @@ export const getAllStaffs = async (req: express.Request, res: express.Response) 
     }
 };
 
-export const getStaffsByStaffname = async (req: express.Request, res: express.Response) => {
-    const result = new Result();
+export const getStaffsByCondition = async (req: express.Request, res: express.Response) => {
+    const result = new PageResult();
     try {
-        const { staffname } = req.params;
-        const regex = new RegExp(staffname, 'i');
-        const query = { name: { $regex: regex } };
-        result.result = await getStaffByStaffname(query);
+        const { condition } = req.params;
+        const reg = new RegExp(condition.trim(),'i');
+        const query: Page = req.body;
+        const page = query.page === 0 ? 1 : query.page;
+        const limit = query.limit === 0 ? 10 : query.limit;
+        const total = await getStaffsCountByCondition(reg);
+        result.result = await getStaffByCondition(reg).skip((page-1)*limit).limit(limit);
+        result.total = total;
+        result.page = page;
+        result.limit = limit;
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
@@ -291,7 +297,7 @@ export const updateStaff = async (req: express.Request, res: express.Response) =
         staff.remark= remark;
         staff.sort = sort;
         staff.createDate= createDate;
-        staff.updateDate= new Date();
+        staff.updateDate= convertDateFormat(new Date());
         staff.status = status;
         
         await staff.save();
@@ -315,7 +321,7 @@ export const sortStaff = async (req: express.Request, res: express.Response) => 
         for (const staff of staffs) {
             const stf = await getStaffById(staff.id);
             stf.sort = staff.sort;
-            stf.updateDate = new Date();
+            stf.updateDate = convertDateFormat(new Date());;
             await stf.save() as Condition;
         }
         result.code = 200;
@@ -338,7 +344,7 @@ export const displayStaff = async (req: express.Request, res: express.Response) 
         for (const staff of staffs) {
             const stf = await getStaffById(staff.id);
             stf.isDisplay = staff.isDisplay;
-            stf.updateDate = new Date();
+            stf.updateDate = convertDateFormat(new Date());;
             await stf.save() as Condition;
         }
         result.code = 200;

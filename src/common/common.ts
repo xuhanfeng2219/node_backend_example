@@ -7,7 +7,7 @@ import { logger } from "./log"
  * @Autor: xuhanfeng
  * @Date: 2023-05-16 19:21:43
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-18 21:30:22
+ * @LastEditTime: 2023-05-18 21:43:10
  */
 export interface Page {
     page: number
@@ -79,11 +79,11 @@ export function parseDate(str: string): Date {
     let year = parseInt(parts[2]);
     if (year > 2023) {
         year = 2023;
-        logger.info(`year`, s);
+        // logger.info(`year`, s);
     }
     let month = parseInt(parts[1]) - 1;
     if (month > 11) {
-        logger.info(`month`, s);
+        // logger.info(`month`, s);
         month = 11;
     }
     const day = parseInt(parts[0]);

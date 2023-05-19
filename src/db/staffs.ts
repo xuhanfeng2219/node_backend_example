@@ -4,11 +4,12 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-18 20:29:31
+ * @LastEditTime: 2023-05-19 10:35:50
  */
 import mongoose from "mongoose";
 import multer from "multer";
 import { convertDateFormat } from "../common/common";
+import { register } from "controllers/authentication";
 
 const StaffSchema = new mongoose.Schema({
     // 概览
@@ -60,8 +61,8 @@ export const StaffModel = mongoose.model('Staff', StaffSchema);
 
 export const getStaffs = () => StaffModel.find().sort({sort: 1});
 export const getStaffsCount = () => StaffModel.count();
-
-export const getStaffByStaffname = (query: any) => StaffModel.find(query);
+export const getStaffsCountByCondition = (reg: RegExp) => StaffModel.count({$or:[{staffname: reg},{code: reg}]});
+export const getStaffByCondition = (reg: RegExp) => StaffModel.find({$or:[{staffname: reg},{code: reg}]});
 export const getStaffByCode = (code: string) => StaffModel.findOne( {code});
 export const getStaffById = (id: string) => StaffModel.findById({_id: id});
 export const createStaff = (values: Record<string, any>) => new StaffModel(values).save().then((staff) => staff.toObject());
