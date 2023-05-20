@@ -4,18 +4,18 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 17:45:27
+ * @LastEditTime: 2023-05-20 10:29:43
  */
 import express from 'express';
 
-import { Page , PageResult, Result, Condition, convertDateFormat, Matching, matchServices} from '../common/common';
+import { Page, PageResult, Result, Condition, convertDateFormat, Matching, matchServices } from '../common/common';
 import { logger } from '../common/log';
-import { getMatchingsCountByCondition,getMatchingByCode, createMatching, getMatchings, getMatchingById, getMatchingsCount, deleteMatchingById, deleteMatchingsByIds, getMatchingByCondition } from '../db/matchings';
+import { getMatchingsCountByCondition, getMatchingByCode, createMatching, getMatchings, getMatchingById, getMatchingsCount, deleteMatchingById, deleteMatchingsByIds, getMatchingByCondition } from '../db/matchings';
 
 export const getAllMatchings = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
-        const matchings  = await getMatchings() as unknown as Array<Matching>;
+        const matchings = await getMatchings() as unknown as Array<Matching>;
         result.result = await matchServices(matchings);
         result.code = 200;
         result.msg = "success";
@@ -32,7 +32,7 @@ export const getMatchingsByCondition = async (req: express.Request, res: express
     const result = new PageResult();
     try {
         const { condition } = req.params;
-        const reg = new RegExp(condition.trim(),'i');
+        const reg = new RegExp(condition.trim(), 'i');
         const query: Page = req.body;
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
@@ -80,7 +80,7 @@ export const createdMatching = async (req: express.Request, res: express.Respons
     const result = new Result();
     try {
         // const { filename, path } = req.file;
-        const { 
+        const {
             code,
             matchingname,
             category,
@@ -99,7 +99,7 @@ export const createdMatching = async (req: express.Request, res: express.Respons
             updateDate,
             status,
             image,
-            note, 
+            note,
             serviceIds
         } = req.body;
         if (!code || !matchingname) {
@@ -107,14 +107,14 @@ export const createdMatching = async (req: express.Request, res: express.Respons
             result.msg = "请填写必填项!";
             return res.status(400).json(result);
         }
-        
+
         const existCode = await getMatchingByCode(code);
         if (existCode) {
             result.code = 400;
             result.msg = "该code已存在！";
             return res.status(400).json(result);
         }
-        
+
         result.result = await createMatching({
             code,
             matchingname,
@@ -140,7 +140,7 @@ export const createdMatching = async (req: express.Request, res: express.Respons
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
-        
+
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -156,7 +156,7 @@ export const deleteMatching = async (req: express.Request, res: express.Response
         result.result = await deleteMatchingById(id);
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result); 
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -172,7 +172,7 @@ export const deleteMatchings = async (req: express.Request, res: express.Respons
         result.result = await deleteMatchingsByIds(ids);
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result); 
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -185,7 +185,7 @@ export const updateMatching = async (req: express.Request, res: express.Response
     const result = new Result();
     try {
         const { id } = req.params;
-        const { 
+        const {
             code,
             matchingname,
             category,
@@ -206,7 +206,7 @@ export const updateMatching = async (req: express.Request, res: express.Response
             image,
             note,
             serviceIds,
-         } = req.body;
+        } = req.body;
         if (!code || !matchingname) {
             result.code = 400;
             result.msg = "请填写必填项!";
@@ -226,7 +226,7 @@ export const updateMatching = async (req: express.Request, res: express.Response
         matching.handletime = handletime;
         matching.usedays = usedays;
         matching.isDonate = isDonate;
-        matching.isFavorite = isFavorite; 
+        matching.isFavorite = isFavorite;
         matching.isDisplay = isDisplay;
         matching.createDate = createDate;
         matching.updateDate = convertDateFormat(new Date());
@@ -234,7 +234,7 @@ export const updateMatching = async (req: express.Request, res: express.Response
         matching.image = image;
         matching.note = note;
         matching.serviceIds = serviceIds;
-        
+
         await matching.save();
         result.code = 200;
         result.msg = "success";

@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 21:00:57
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 16:31:32
+ * @LastEditTime: 2023-05-20 10:29:09
  */
 import express from 'express';
 
@@ -12,12 +12,12 @@ import { getAllMatchings, deleteMatching, updateMatching, getMatchingsByPage, cr
 import { isAuthenticated, isOwner } from '../middlewares';
 import { upload } from '../db/matchings';
 
-export default(router: express.Router) => {
+export default (router: express.Router) => {
     router.get('/matchings', getAllMatchings);
     router.post('/matchings', createdMatching);
     router.post('/matchings/page', getMatchingsByPage);
-    router.delete('/matchings/:id',deleteMatching);
-    router.post('/matchings/batchdelete',deleteMatchings);
+    router.delete('/matchings/:id', deleteMatching);
+    router.post('/matchings/batchdelete', deleteMatchings);
     router.patch("/matchings/:id", updateMatching);
     router.post('/matchings/favorite', favoriteMatching);
     router.post('/matchings/display', displayMatching);
