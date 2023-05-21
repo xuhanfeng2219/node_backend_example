@@ -4,11 +4,10 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 19:16:09
+ * @LastEditTime: 2023-05-21 19:19:13
  */
 import mongoose from "mongoose";
 import multer from "multer";
-import { convertDateFormat } from "../common/common";
 
 const CustomerSchema = new mongoose.Schema({
     // 概览
