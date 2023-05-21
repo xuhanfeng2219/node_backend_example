@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-20 10:28:43
+ * @LastEditTime: 2023-05-21 19:16:09
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -46,8 +46,8 @@ const CustomerSchema = new mongoose.Schema({
     notes2: { type: String },
     loyaltyPoint: { type: Number },
     // other
-    createDate: { type: Date, default: convertDateFormat(new Date()) },
-    updateDate: { type: Date, default: convertDateFormat(new Date()) },
+    createDate: { type: Date },
+    updateDate: { type: Date },
     isDisplay: { type: String, default: "Yes" },
 });
 

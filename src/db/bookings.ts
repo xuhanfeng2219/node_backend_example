@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-20 10:27:40
+ * @LastEditTime: 2023-05-21 17:40:26
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -36,6 +36,7 @@ const BookingSchema = new mongoose.Schema({
 export const BookingModel = mongoose.model('Booking', BookingSchema);
 
 export const getBookings = () => BookingModel.find();
+export const getBookingsByDate = (date: Date) => BookingModel.find({updateDate: date});
 export const getBookingsCount = () => BookingModel.count();
 export const getBookingsCountByCondition = (reg: RegExp) => BookingModel.count({ $or: [{ code: reg }] });
 export const getBookingByCondition = (reg: RegExp) => BookingModel.find({ $or: [{ code: reg }] });
