@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 18:29:01
+ * @LastEditTime: 2023-05-22 20:25:25
  */
 import express from 'express';
 
@@ -150,6 +150,7 @@ export const createdBooking = async (req: express.Request, res: express.Response
             serviceIds,
             matchingIds,
         });
+        // 创建扣减服务次数
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
