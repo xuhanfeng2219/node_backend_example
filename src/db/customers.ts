@@ -4,10 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 10:55:58
+ * @LastEditTime: 2023-05-22 19:56:32
  */
 import mongoose from "mongoose";
 import multer from "multer";
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const CustomerSchema = new mongoose.Schema({
     // 概览
@@ -51,17 +52,23 @@ const CustomerSchema = new mongoose.Schema({
     isPrime: { type: String, default: "No" },
     matchingIds: { type: Array<String>, default: [] },
     paystatus: { type: String, default: "Unpaid" },
-    balance: { type: Number, default: 0}
+    balance: { type: Number, default: 0 }
 });
 
 // CustomerSchema.index({lastname: 'text', ICNo: 'text', email: 'text', code: 'text'});
+CustomerSchema.plugin(mongoosePaginate);
+const selectFileds = "_id code lastname mobile ICNo matchingIds createDate updateDate";
+export interface CustomerDocument extends mongoose.Document { }
 
 export const CustomerModel = mongoose.model('Customer', CustomerSchema);
+export const CustomerPaginateModel = mongoose.model<CustomerDocument, mongoose.PaginateModel<CustomerDocument>>('Customer', CustomerSchema);
 
 export const getCustomers = () => CustomerModel.find();
+export const getCustomersByLimit = (page: number, limit: number) => CustomerPaginateModel.paginate({}, { page, limit, select: selectFileds });
 export const getCustomersCount = () => CustomerModel.count();
 export const getCustomersCountByCondition = (reg: RegExp) => CustomerModel.count({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] });
-export const queryCustomersByCondition = (reg: RegExp) => CustomerModel.find({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] });
+export const getCustomersByCondition2 = (reg: RegExp, page: number, limit: number) => CustomerPaginateModel.paginate({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] }, { page, limit, select: selectFileds });
+export const queryCustomersByCondition = (reg: RegExp, page: number, limit: number) => CustomerModel.find({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] }).skip((page - 1) * limit).limit(limit).exec();
 export const getCustomerByMobile = (mobile: string) => CustomerModel.findOne({ mobile: mobile });
 export const getCustomerByICNo = (icNo: string) => CustomerModel.findOne({ ICNo: icNo });
 export const getCustomerById = (id: string) => CustomerModel.findById({ _id: id });

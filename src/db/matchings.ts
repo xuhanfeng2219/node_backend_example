@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 20:30:07
+ * @LastEditTime: 2023-05-22 18:26:57
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -38,9 +38,10 @@ const MatchingSchema = new mongoose.Schema({
 export const MatchingModel = mongoose.model('Matching', MatchingSchema);
 
 export const getMatchings = () => MatchingModel.find();
+export const getMatchingsByLimit = (page: number, limit: number) => MatchingModel.find().skip((page - 1) * limit).limit(limit).exec();
 export const getMatchingsCount = () => MatchingModel.count();
 export const getMatchingsCountByCondition = (reg: RegExp) => MatchingModel.count({ $or: [{ matchingname: reg }, { code: reg }] });
-export const getMatchingByCondition = (reg: RegExp) => MatchingModel.find({ $or: [{ matchingname: reg }, { code: reg }] });
+export const getMatchingByCondition = (reg: RegExp, page: number, limit: number) => MatchingModel.find({ $or: [{ matchingname: reg }, { code: reg }] }).skip((page - 1) * limit).limit(limit).exec();
 export const getMatchingByCode = (code: string) => MatchingModel.findOne({ code });
 export const getMatchingById = (id: string) => MatchingModel.findById({ _id: id });
 export const getMatchingsByIds = (ids: Array<string>) => MatchingModel.find({ _id: { $in: ids } });

@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 20:22:54
+ * @LastEditTime: 2023-05-22 18:36:25
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -36,9 +36,10 @@ const ServiceSchema = new mongoose.Schema({
 export const ServiceModel = mongoose.model('Service', ServiceSchema);
 
 export const getServices = () => ServiceModel.find();
+export const getServicesByLimit = (page: number, limit: number) => ServiceModel.find().skip((page - 1) * limit).limit(limit).exec();
 export const getServicesCount = () => ServiceModel.count();
 export const getServicesCountByCondition = (reg: RegExp) => ServiceModel.count({ $or: [{ servicename: reg }, { code: reg }] });
-export const getServiceByCondition = (reg: RegExp) => ServiceModel.find({ $or: [{ servicename: reg }, { code: reg }] });
+export const getServiceByCondition = (reg: RegExp, page: number, limit: number) => ServiceModel.find({ $or: [{ servicename: reg }, { code: reg }] }).skip((page - 1) * limit).limit(limit).exec();
 export const getServiceByCode = (code: string) => ServiceModel.findOne({ code });
 export const getServiceById = (id: string) => ServiceModel.findById({ _id: id });
 export const getServicesByIds = (ids: Array<string>) => ServiceModel.find({ _id: { $in: ids } });

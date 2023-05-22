@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:49:28
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 14:14:15
+ * @LastEditTime: 2023-05-22 17:38:37
  */
 import express from 'express';
 
@@ -19,7 +19,7 @@ export const isAuthenticated = async (req: express.Request, res: express.Respons
         const sessionToken = req.cookies['XUHANFENG-AUTH'];
 
         if (!sessionToken) {
-            return res.sendStatus(403).json({msg: 'Token can\'t set '});
+            return res.sendStatus(403).json({ msg: 'Token can\'t set ' });
         }
 
         const existingUser = await getUserBySessionToken(sessionToken);

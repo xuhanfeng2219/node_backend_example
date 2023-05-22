@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 17:30:01
+ * @LastEditTime: 2023-05-22 18:40:28
  */
 import express from 'express';
 
 import { Page , PageResult, Result, Condition, convertDateFormat} from '../common/common';
 import { logger } from '../common/log';
-import { getStaffsCountByCondition,getStaffByCode, createStaff, getStaffs, getStaffById, getStaffsCount, deleteStaffById, deleteStaffsByIds, getStaffByCondition } from '../db/staffs';
+import { getStaffsCountByCondition,getStaffByCode, createStaff, getStaffs, getStaffById, getStaffsCount, deleteStaffById, deleteStaffsByIds, getStaffByCondition, getStaffsByLimit } from '../db/staffs';
 
 
 export const getAllStaffs = async (req: express.Request, res: express.Response) => {
@@ -37,7 +37,7 @@ export const getStaffsByCondition = async (req: express.Request, res: express.Re
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getStaffsCountByCondition(reg);
-        result.result = await getStaffByCondition(reg).skip((page-1)*limit).limit(limit);
+        result.result = await getStaffByCondition(reg, page, limit);
         result.total = total;
         result.page = page;
         result.limit = limit;
@@ -59,7 +59,7 @@ export const getStaffsByPage = async (req: express.Request, res: express.Respons
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getStaffsCount();
-        const staffs = await getStaffs().skip((page - 1)*limit).limit(limit);
+        const staffs = await getStaffsByLimit(page, limit);
         result.result = staffs;
         result.total = total;
         result.page = page;

@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 19:19:18
+ * @LastEditTime: 2023-05-22 18:40:10
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -58,9 +58,10 @@ const StaffSchema = new mongoose.Schema({
 export const StaffModel = mongoose.model('Staff', StaffSchema);
 
 export const getStaffs = () => StaffModel.find().sort({ sort: 1 });
+export const getStaffsByLimit = (page: number, limit: number) => StaffModel.find().sort({ sort: 1 }).skip((page - 1) * limit).limit(limit).exec();
 export const getStaffsCount = () => StaffModel.count();
 export const getStaffsCountByCondition = (reg: RegExp) => StaffModel.count({ $or: [{ staffname: reg }, { code: reg }] });
-export const getStaffByCondition = (reg: RegExp) => StaffModel.find({ $or: [{ staffname: reg }, { code: reg }] });
+export const getStaffByCondition = (reg: RegExp, page: number, limit: number) => StaffModel.find({ $or: [{ staffname: reg }, { code: reg }] }).skip((page - 1) * limit).limit(limit).exec();
 export const getStaffByCode = (code: string) => StaffModel.findOne({ code });
 export const getStaffById = (id: string) => StaffModel.findById({ _id: id });
 export const createStaff = (values: Record<string, any>) => new StaffModel(values).save().then((staff) => staff.toObject());

@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-20 10:29:43
+ * @LastEditTime: 2023-05-22 18:27:42
  */
 import express from 'express';
 
 import { Page, PageResult, Result, Condition, convertDateFormat, Matching, matchServices } from '../common/common';
 import { logger } from '../common/log';
-import { getMatchingsCountByCondition, getMatchingByCode, createMatching, getMatchings, getMatchingById, getMatchingsCount, deleteMatchingById, deleteMatchingsByIds, getMatchingByCondition } from '../db/matchings';
+import { getMatchingsCountByCondition, getMatchingByCode, createMatching, getMatchings, getMatchingById, getMatchingsCount, deleteMatchingById, deleteMatchingsByIds, getMatchingByCondition, getMatchingsByLimit } from '../db/matchings';
 
 export const getAllMatchings = async (req: express.Request, res: express.Response) => {
     const result = new Result();
@@ -37,7 +37,7 @@ export const getMatchingsByCondition = async (req: express.Request, res: express
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getMatchingsCountByCondition(reg);
-        const matchings = await getMatchingByCondition(reg).skip((page - 1) * limit).limit(limit) as unknown as Array<Matching>;
+        const matchings = await getMatchingByCondition(reg, page, limit) as unknown as Array<Matching>;
         result.result = await matchServices(matchings);
         result.total = total;
         result.page = page;
@@ -60,7 +60,7 @@ export const getMatchingsByPage = async (req: express.Request, res: express.Resp
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getMatchingsCount();
-        const matchings = await getMatchings().skip((page - 1) * limit).limit(limit) as unknown as Array<Matching>;
+        const matchings = await getMatchingsByLimit(page, limit) as unknown as Array<Matching>;
         result.result = await matchServices(matchings);
         result.total = total;
         result.page = page;

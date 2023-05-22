@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 09:11:49
+ * @LastEditTime: 2023-05-22 18:29:01
  */
 import express from 'express';
 
 import { Page, PageResult, Result, getBookingDocuments, convertDateFormat, convertNextDayFormat } from '../common/common';
 import { logger } from '../common/log';
-import { getBookingsCountByCondition, getBookingByCode, createBooking, getBookings, getBookingById, getBookingsCount, deleteBookingById, deleteBookingsByIds, getBookingByCondition, getBookingsByDate } from '../db/bookings';
+import { getBookingsCountByCondition, getBookingByCode, createBooking, getBookings, getBookingById, getBookingsCount, deleteBookingById, deleteBookingsByIds, getBookingByCondition, getBookingsByDate, getBookingsByLimt } from '../db/bookings';
 
 export const getAllBookings = async (req: express.Request, res: express.Response) => {
     const result = new Result();
@@ -38,7 +38,7 @@ export const getBookingsByCondition = async (req: express.Request, res: express.
         let page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         let limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getBookingsCountByCondition(reg);
-        const bookings = await getBookingByCondition(reg).skip((page - 1) * limit).limit(limit);
+        const bookings = await getBookingByCondition(reg, page, limit);
         result.result = await getBookingDocuments(bookings);
         result.total = total;
         result.page = page;
@@ -61,7 +61,7 @@ export const getBookingsByPage = async (req: express.Request, res: express.Respo
         let page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         let limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getBookingsCount();
-        const bookings = await getBookings().skip((page - 1) * limit).limit(limit);
+        const bookings = await getBookingsByLimt(page, limit);
         result.result = await getBookingDocuments(bookings);
         result.total = total;
         result.page = page;

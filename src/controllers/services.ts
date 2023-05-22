@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 20:24:16
+ * @LastEditTime: 2023-05-22 18:37:39
  */
 import express from 'express';
 
-import { Page , PageResult, Result, Condition, convertDateFormat} from '../common/common';
+import { Page, PageResult, Result, Condition, convertDateFormat } from '../common/common';
 import { logger } from '../common/log';
-import { getServicesCountByCondition,getServiceByCode, createService, getServices, getServiceById, getServicesCount, deleteServiceById, deleteServicesByIds, getServiceByCondition, getServicesByIds } from '../db/services';
+import { getServicesCountByCondition, getServiceByCode, createService, getServices, getServiceById, getServicesCount, deleteServiceById, deleteServicesByIds, getServiceByCondition, getServicesByIds, getServicesByLimit } from '../db/services';
 
 
 export const getAllServices = async (req: express.Request, res: express.Response) => {
@@ -32,12 +32,12 @@ export const getServicesByCondition = async (req: express.Request, res: express.
     const result = new PageResult();
     try {
         const { condition } = req.params;
-        const reg = new RegExp(condition.trim(),'i');
+        const reg = new RegExp(condition.trim(), 'i');
         const query: Page = req.body;
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getServicesCountByCondition(reg);
-        result.result = await getServiceByCondition(reg).skip((page-1)*limit).limit(limit);
+        result.result = await getServiceByCondition(reg, page, limit);
         result.total = total;
         result.page = page;
         result.limit = limit;
@@ -59,7 +59,7 @@ export const getServicesByPage = async (req: express.Request, res: express.Respo
         const page = query.page === 0 ? 1 : query.page;
         const limit = query.limit === 0 ? 10 : query.limit;
         const total = await getServicesCount();
-        const Services = await getServices().skip((page - 1)*limit).limit(limit);
+        const Services = await getServicesByLimit(page, limit);
         result.result = Services;
         result.total = total;
         result.page = page;
@@ -79,7 +79,7 @@ export const createdService = async (req: express.Request, res: express.Response
     const result = new Result();
     try {
         // const { filename, path } = req.file;
-        const { 
+        const {
             code,
             servicename,
             category,
@@ -98,21 +98,21 @@ export const createdService = async (req: express.Request, res: express.Response
             updateDate,
             status,
             image,
-            note, 
+            note,
         } = req.body;
         if (!code || !servicename) {
             result.code = 400;
             result.msg = "请填写必填项!";
             return res.status(400).json(result);
         }
-        
+
         const existCode = await getServiceByCode(code);
         if (existCode) {
             result.code = 400;
             result.msg = "该code已存在!";
             return res.status(400).json(result);
         }
-        
+
         result.result = await createService({
             code,
             servicename,
@@ -137,7 +137,7 @@ export const createdService = async (req: express.Request, res: express.Response
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
-        
+
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -153,7 +153,7 @@ export const deleteService = async (req: express.Request, res: express.Response)
         result.result = await deleteServiceById(id);
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result); 
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -169,7 +169,7 @@ export const deleteServices = async (req: express.Request, res: express.Response
         result.result = await deleteServicesByIds(ids);
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result); 
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -185,7 +185,7 @@ export const queryServicesByIds = async (req: express.Request, res: express.Resp
         result.result = await getServicesByIds(ids);
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result); 
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -198,7 +198,7 @@ export const updateService = async (req: express.Request, res: express.Response)
     const result = new Result();
     try {
         const { id } = req.params;
-        const { 
+        const {
             code,
             servicename,
             category,
@@ -218,7 +218,7 @@ export const updateService = async (req: express.Request, res: express.Response)
             status,
             image,
             note
-         } = req.body;
+        } = req.body;
         if (!code || !servicename) {
             result.code = 400;
             result.msg = "请填写必填项!";
@@ -238,14 +238,14 @@ export const updateService = async (req: express.Request, res: express.Response)
         service.handletime = handletime;
         service.usedays = usedays;
         service.isDonate = isDonate;
-        service.isFavorite = isFavorite; 
+        service.isFavorite = isFavorite;
         service.isDisplay = isDisplay;
         service.createDate = createDate;
         service.updateDate = convertDateFormat(new Date());
         service.status = status;
         service.image = image;
         service.note = note;
-        
+
         await service.save();
         result.code = 200;
         result.msg = "success";

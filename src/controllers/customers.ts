@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 10:57:47
+ * @LastEditTime: 2023-05-22 19:58:03
  */
 import express from 'express';
 
 import { Page, PageResult, Result, Condition, Customer, parseDate, convertDateFormat, getCustomersDocumets } from '../common/common';
 import { logger } from '../common/log';
-import { getCustomersCountByCondition, getCustomersCount, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, queryCustomersByCondition, createCustomers } from '../db/customers';
+import { getCustomersCountByCondition, getCustomersByCondition2, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, queryCustomersByCondition, createCustomers, getCustomersByLimit, CustomerDocument } from '../db/customers';
 import csv from 'csvtojson';
 
 
@@ -36,12 +36,13 @@ export const getCustomersByPage = async (req: express.Request, res: express.Resp
         const query: Page = req.body;
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
-        const total = await getCustomersCount();
-        const customers = await getCustomers().skip((page - 1) * limit).limit(limit);
-        result.result = await getCustomersDocumets(customers);
-        result.total = total;
-        result.page = page;
-        result.limit = limit;
+        // const total = await getCustomersCount();
+        const customers = await getCustomersByLimit(page, limit);
+        // result.result = await getCustomersDocumets(customers as unknown as CustomerDocument);
+        result.result = customers;
+        // result.total = customers.total;
+        // result.page = page;
+        // result.limit = limit;
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result);
@@ -201,12 +202,13 @@ export const getCustomersByCondition = async (req: express.Request, res: express
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const reg = new RegExp(condition.trim(), 'i');
-        const total = await getCustomersCountByCondition(reg);
-        const customers = await queryCustomersByCondition(reg).skip((page - 1) * limit).limit(limit);
-        result.result = await getCustomersDocumets(customers);
-        result.total = total;
-        result.page = page;
-        result.limit = limit;
+        // const total = await getCustomersCountByCondition(reg);
+        // const customers = await queryCustomersByCondition(reg, page, limit);
+        // result.result = await getCustomersDocumets(customers);
+        result.result = await getCustomersByCondition2(reg, page, limit);
+        // result.total = total;
+        // result.page = page;
+        // result.limit = limit;
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result);

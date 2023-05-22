@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 09:10:51
+ * @LastEditTime: 2023-05-22 18:28:30
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -36,13 +36,16 @@ const BookingSchema = new mongoose.Schema({
 export const BookingModel = mongoose.model('Booking', BookingSchema);
 
 export const getBookings = () => BookingModel.find();
-export const getBookingsByDate = (startDate: Date, endDate: Date) => BookingModel.find({updateDate: {
-    $gte: startDate,
-    $lte: endDate,
-}});
+export const getBookingsByLimt = (page: number, limit: number) => BookingModel.find().skip((page - 1) * limit).limit(limit).exec();
+export const getBookingsByDate = (startDate: Date, endDate: Date) => BookingModel.find({
+    updateDate: {
+        $gte: startDate,
+        $lte: endDate,
+    }
+});
 export const getBookingsCount = () => BookingModel.count();
 export const getBookingsCountByCondition = (reg: RegExp) => BookingModel.count({ $or: [{ code: reg }] });
-export const getBookingByCondition = (reg: RegExp) => BookingModel.find({ $or: [{ code: reg }] });
+export const getBookingByCondition = (reg: RegExp, page: number, limit: number) => BookingModel.find({ $or: [{ code: reg }] }).skip((page - 1) * limit).limit(limit).exec();
 export const getBookingByCode = (code: string) => BookingModel.findOne({ code });
 export const getBookingById = (id: string) => BookingModel.findById({ _id: id });
 export const createBooking = (values: Record<string, any>) => new BookingModel(values).save().then((booking) => booking.toObject());

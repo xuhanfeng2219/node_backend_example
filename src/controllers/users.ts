@@ -4,12 +4,12 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 15:40:38
+ * @LastEditTime: 2023-05-22 17:38:32
  */
 import express from 'express';
 
 import { getUsers, deleteUserById, getUserById, getUserByUsername, getUsersCount } from '../db/users';
-import { Page , PageResult, Result} from '../common/common';
+import { Page, PageResult, Result } from '../common/common';
 import { logger } from '../common/log';
 
 export const getAllUsers = async (req: express.Request, res: express.Response) => {
@@ -31,10 +31,10 @@ export const getUsersByPage = async (req: express.Request, res: express.Response
     const result = new PageResult();
     try {
         const query: Page = req.body;
-        const page = query.page === 0 || Object.keys(query).length === 0? 1 : query.page;
+        const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getUsersCount();
-        const users = await getUsers().skip((page - 1)*limit).limit(limit);
+        const users = await getUsers().skip((page - 1) * limit).limit(limit);
         result.result = users;
         result.total = total;
         result.page = page;
@@ -58,7 +58,7 @@ export const deleteUser = async (req: express.Request, res: express.Response) =>
         result.result = await deleteUserById(id);
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result); 
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
