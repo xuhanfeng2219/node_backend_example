@@ -4,11 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 20:48:12
+ * @LastEditTime: 2023-05-22 09:11:49
  */
 import express from 'express';
 
-import { Page, PageResult, Result, getBookingDocuments, convertDateFormat } from '../common/common';
+import { Page, PageResult, Result, getBookingDocuments, convertDateFormat, convertNextDayFormat } from '../common/common';
 import { logger } from '../common/log';
 import { getBookingsCountByCondition, getBookingByCode, createBooking, getBookings, getBookingById, getBookingsCount, deleteBookingById, deleteBookingsByIds, getBookingByCondition, getBookingsByDate } from '../db/bookings';
 
@@ -80,8 +80,8 @@ export const getBookingsByPage = async (req: express.Request, res: express.Respo
 export const getBookingsByUpDate = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
-        const {date} = req.params;
-        result.result = await getBookingsByDate(convertDateFormat(new Date(date)));
+        const { date } = req.params;
+        result.result = await getBookingsByDate(convertDateFormat(new Date(date)), convertNextDayFormat(new Date()));
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result);

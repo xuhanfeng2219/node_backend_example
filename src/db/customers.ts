@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 19:19:13
+ * @LastEditTime: 2023-05-22 10:55:58
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -48,6 +48,10 @@ const CustomerSchema = new mongoose.Schema({
     createDate: { type: Date },
     updateDate: { type: Date },
     isDisplay: { type: String, default: "Yes" },
+    isPrime: { type: String, default: "No" },
+    matchingIds: { type: Array<String>, default: [] },
+    paystatus: { type: String, default: "Unpaid" },
+    balance: { type: Number, default: 0}
 });
 
 // CustomerSchema.index({lastname: 'text', ICNo: 'text', email: 'text', code: 'text'});

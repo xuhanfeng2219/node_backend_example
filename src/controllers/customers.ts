@@ -4,20 +4,21 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 17:31:11
+ * @LastEditTime: 2023-05-22 10:57:47
  */
 import express from 'express';
 
-import { Page , PageResult, Result, Condition, Customer, parseDate, convertDateFormat } from '../common/common';
+import { Page, PageResult, Result, Condition, Customer, parseDate, convertDateFormat, getCustomersDocumets } from '../common/common';
 import { logger } from '../common/log';
-import { getCustomersCountByCondition,getCustomersCount, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, queryCustomersByCondition, createCustomers } from '../db/customers';
+import { getCustomersCountByCondition, getCustomersCount, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, queryCustomersByCondition, createCustomers } from '../db/customers';
 import csv from 'csvtojson';
 
 
 export const getAllCustomers = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
-        result.result = await getCustomers();
+        const customers = await getCustomers();
+        result.result = await getCustomersDocumets(customers);
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
@@ -36,8 +37,8 @@ export const getCustomersByPage = async (req: express.Request, res: express.Resp
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getCustomersCount();
-        const staffs = await getCustomers().skip((page - 1)*limit).limit(limit);
-        result.result = staffs;
+        const customers = await getCustomers().skip((page - 1) * limit).limit(limit);
+        result.result = await getCustomersDocumets(customers);
         result.total = total;
         result.page = page;
         result.limit = limit;
@@ -55,7 +56,7 @@ export const getCustomersByPage = async (req: express.Request, res: express.Resp
 export const createdCustomer = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
-        const { 
+        const {
             code,
             salutation,
             firstname,
@@ -89,22 +90,25 @@ export const createdCustomer = async (req: express.Request, res: express.Respons
             loyaltyPoint,
             createDate,
             updateDate,
-            isDisplay
-         } = req.body;
+            isDisplay,
+            isPrime,
+            matchingIds,
+            paystatus,
+            balance,
+        } = req.body;
         if (!code) {
             result.code = 400;
             result.msg = "请填写必填项!";
             return res.status(400).json(result);
         }
-        
+
         const existCustomer = await getCustomerByMobile(mobile) || await getCustomerByICNo(ICNo);
-        logger.info(`Customer:`, existCustomer);
         if (existCustomer) {
             result.code = 400;
             result.msg = "该客户已存在!";
             return res.status(400).json(result);
         }
-        
+
         result.result = await createCustomer({
             code,
             salutation,
@@ -139,12 +143,16 @@ export const createdCustomer = async (req: express.Request, res: express.Respons
             loyaltyPoint,
             createDate: convertDateFormat(new Date()),
             updateDate: convertDateFormat(new Date()),
-            isDisplay
+            isDisplay,
+            isPrime,
+            matchingIds,
+            paystatus,
+            balance,
         });
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
-        
+
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -160,7 +168,7 @@ export const deleteCustomer = async (req: express.Request, res: express.Response
         result.result = await deleteCustomerById(id);
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result); 
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -176,7 +184,7 @@ export const deleteCustomers = async (req: express.Request, res: express.Respons
         result.result = await deleteCustomersByIds(ids);
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result); 
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -194,8 +202,8 @@ export const getCustomersByCondition = async (req: express.Request, res: express
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const reg = new RegExp(condition.trim(), 'i');
         const total = await getCustomersCountByCondition(reg);
-        const customers = await queryCustomersByCondition(reg).skip((page - 1)*limit).limit(limit);
-        result.result = customers;
+        const customers = await queryCustomersByCondition(reg).skip((page - 1) * limit).limit(limit);
+        result.result = await getCustomersDocumets(customers);
         result.total = total;
         result.page = page;
         result.limit = limit;
@@ -214,7 +222,7 @@ export const updateCustomer = async (req: express.Request, res: express.Response
     const result = new Result();
     try {
         const { id } = req.params;
-        const { 
+        const {
             code,
             salutation,
             firstname,
@@ -248,7 +256,11 @@ export const updateCustomer = async (req: express.Request, res: express.Response
             loyaltyPoint,
             createDate,
             updateDate,
-            isDisplay
+            isDisplay,
+            isPrime,
+            matchingIds,
+            paystatus,
+            balance,
         } = req.body;
         if (!code) {
             result.code = 400;
@@ -261,37 +273,41 @@ export const updateCustomer = async (req: express.Request, res: express.Response
         customer.code = code;
         customer.salutation = salutation;
         customer.firstname = firstname;
-        customer.lastname =  lastname;
-        customer.joinDate =  joinDate;
-        customer.customerGroup =  customerGroup;
-        customer.membershipNo =  membershipNo;
-        customer.consultant =  consultant;
-        customer.ICNo =  ICNo;
-        customer.gender =  gender;
-        customer.birthday =  birthday;
-        customer.race =  race;
-        customer.religion =  religion;
-        customer.nationality =  nationality;
-        customer.maritalStatus =  maritalStatus;
-        customer.occupation =  occupation;
-        customer.mobile =  mobile;
-        customer.homeTelephone =  homeTelephone;
-        customer.officeTelephone =  officeTelephone;
-        customer.otherTelephone =  otherTelephone;
-        customer.fax =  fax;
-        customer.email =  email;
-        customer.address =  address;
-        customer.city =  city;
-        customer.state =  state;
-        customer.postCode =  postCode;
-        customer.country =  country;
-        customer.contactPreference =  contactPreference;
-        customer.notes =  notes;
-        customer.notes2 =  notes2;
-        customer.loyaltyPoint =  loyaltyPoint;
-        customer.createDate =  convertDateFormat(new Date(createDate));
-        customer.updateDate =  convertDateFormat(new Date());
-        customer.isDisplay =  isDisplay;
+        customer.lastname = lastname;
+        customer.joinDate = joinDate;
+        customer.customerGroup = customerGroup;
+        customer.membershipNo = membershipNo;
+        customer.consultant = consultant;
+        customer.ICNo = ICNo;
+        customer.gender = gender;
+        customer.birthday = birthday;
+        customer.race = race;
+        customer.religion = religion;
+        customer.nationality = nationality;
+        customer.maritalStatus = maritalStatus;
+        customer.occupation = occupation;
+        customer.mobile = mobile;
+        customer.homeTelephone = homeTelephone;
+        customer.officeTelephone = officeTelephone;
+        customer.otherTelephone = otherTelephone;
+        customer.fax = fax;
+        customer.email = email;
+        customer.address = address;
+        customer.city = city;
+        customer.state = state;
+        customer.postCode = postCode;
+        customer.country = country;
+        customer.contactPreference = contactPreference;
+        customer.notes = notes;
+        customer.notes2 = notes2;
+        customer.loyaltyPoint = loyaltyPoint;
+        customer.createDate = convertDateFormat(new Date(createDate));
+        customer.updateDate = convertDateFormat(new Date());
+        customer.isDisplay = isDisplay;
+        customer.isPrime = isPrime;
+        customer.matchingIds = matchingIds;
+        customer.paystatus = paystatus;
+        customer.balance = balance;
         await customer.save();
 
         result.code = 200;
@@ -309,7 +325,7 @@ export const updateCustomer = async (req: express.Request, res: express.Response
 export const importCustomers = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
-        const {filename, path}  = req.file;
+        const { filename, path } = req.file;
         if (!filename) {
             result.code = 400;
             result.msg = "未提供csv文件!";
@@ -319,36 +335,36 @@ export const importCustomers = async (req: express.Request, res: express.Respons
         csv()
             .fromFile(path)
             .then(async (data: any) => {
-            try {
-                const isExist = await getCustomerByICNo(data.ICNo) || await getCustomerByMobile(data.mobile);
-                if (isExist) {
+                try {
+                    const isExist = await getCustomerByICNo(data.ICNo) || await getCustomerByMobile(data.mobile);
+                    if (isExist) {
+                        result.code = 400;
+                        result.msg = "客户已存在!";
+                        return res.status(400).json(result);
+                    }
+                    const customers: Customer[] = data;
+                    for (const customer of customers) {
+                        if (customer.birthday) {
+                            customer.birthday = parseDate(customer.birthday.toString());
+                        }
+                        if (customer.joinDate) {
+                            customer.joinDate = parseDate(customer.joinDate.toString());
+                        }
+                    }
+                    result.result = await createCustomers(customers);
+
+                } catch (error) {
+                    logger.error('插入数据到 MongoDB 时发生错误:', error);
                     result.code = 400;
-                    result.msg = "客户已存在!";
+                    result.msg = error.message;
                     return res.status(400).json(result);
                 }
-                const customers: Customer[] = data;
-                for (const customer of customers) {
-                    if (customer.birthday) {
-                        customer.birthday = parseDate(customer.birthday.toString());
-                    }
-                    if (customer.joinDate) {
-                        customer.joinDate = parseDate(customer.joinDate.toString());
-                    }
-                }
-                result.result = await createCustomers(customers);
-                
-            } catch (error) {
-                logger.error('插入数据到 MongoDB 时发生错误:', error);
-                result.code = 400;
-                result.msg = error.message;
-                return res.status(400).json(result);
-            }
-        });
-        
+            });
+
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
-        
+
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -366,6 +382,56 @@ export const displayCustomers = async (req: express.Request, res: express.Respon
             const c = await getCustomerById(customer.id);
             if (c !== null && c !== undefined && Object.keys(c).length > 0) {
                 c.isDisplay = customer.isDisplay;
+                c.updateDate = convertDateFormat(new Date());
+                await c.save();
+            }
+        }
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result);
+
+    } catch (error) {
+        logger.error(error);
+        result.code = 400;
+        result.msg = "fail";
+        return res.status(400).json(result);
+    }
+};
+
+export const updateCustomersMatchings = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
+    try {
+        const { list } = req.body;
+        const customers = list as Array<Condition>;
+        for (const customer of customers) {
+            const c = await getCustomerById(customer.id);
+            if (c !== null && c !== undefined && Object.keys(c).length > 0) {
+                c.matchingIds = customer.matchingIds;
+                c.updateDate = convertDateFormat(new Date());
+                await c.save();
+            }
+        }
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result);
+
+    } catch (error) {
+        logger.error(error);
+        result.code = 400;
+        result.msg = "fail";
+        return res.status(400).json(result);
+    }
+};
+
+export const primeCustomers = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
+    try {
+        const { list } = req.body;
+        const customers = list as Array<Condition>;
+        for (const customer of customers) {
+            const c = await getCustomerById(customer.id);
+            if (c !== null && c !== undefined && Object.keys(c).length > 0) {
+                c.isPrime = customer.isPrime;
                 c.updateDate = convertDateFormat(new Date());
                 await c.save();
             }

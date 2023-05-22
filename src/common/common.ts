@@ -1,5 +1,5 @@
 import { logger } from "./log"
-import { getServicesByIds, getServiceById } from "../db/services"
+import { getServicesByIds } from "../db/services"
 import { getStaffById } from "../db/staffs"
 import { getCustomerById } from "../db/customers"
 import { getMatchingsByIds } from "../db/matchings"
@@ -10,7 +10,7 @@ import { Document } from "mongodb"
  * @Autor: xuhanfeng
  * @Date: 2023-05-16 19:21:43
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 20:36:57
+ * @LastEditTime: 2023-05-22 11:10:24
  */
 export interface Page {
     page: number
@@ -37,6 +37,8 @@ export interface Condition {
     sort: number
     isDisplay: string
     isFavorite: string
+    matchingIds: string[]
+    isPrime: string
 };
 
 export class Customer {
@@ -155,6 +157,58 @@ export async function matchServices(matchings: Array<Matching>): Promise<Array<M
     return mathes;
 }
 
+export async function getCustomersDocumets(customers: Document[]): Promise<Document[]> {
+    const docs = new Array<Document>();
+    for (const customer of customers) {
+        const matchings = await getMatchingsByIds(customer.matchingIds);
+        const matchResults = await matchServices(matchings as unknown as Array<Matching>);
+        const doc: Document = {
+            '_id': customer._id,
+            'code': customer.code,
+            'salutation': customer.salutation,
+            'firstname': customer.firstname,
+            'lastname': customer.lastname,
+            'joinDate': customer.joinDate,
+            'customerGroup': customer.customerGroup,
+            'membershipNo': customer.membershipNo,
+            'consultant': customer.consultant,
+            'ICNo': customer.ICNo,
+            'gender': customer.gender,
+            'birthday': customer.birthday,
+            'race': customer.race,
+            'religion': customer.religion,
+            'nationality': customer.nationality,
+            'maritalStatus': customer.maritalStatus,
+            'occupation': customer.occupation,
+            'mobile': customer.mobile,
+            'homeTelephone': customer.homeTelephone,
+            'officeTelephone': customer.officeTelephone,
+            'otherTelephone': customer.otherTelephone,
+            'fax': customer.fax,
+            'email': customer.email,
+            'address': customer.address,
+            'city': customer.city,
+            'state': customer.state,
+            'postCode': customer.postCode,
+            'country': customer.country,
+            'contactPreference': customer.contactPreference,
+            'notes': customer.notes,
+            'notes2': customer.notes2,
+            'loyaltyPoint': customer.loyaltyPoint,
+            'createDate': customer.createDate,
+            'updateDate': customer.updateDate,
+            'isDisplay': customer.isDisplay,
+            'isPrime': customer.isPrime,
+            'paystatus': customer.paystatus,
+            'balance': customer.balance,
+            'matchingIds': customer.matchingIds,
+            'matchings': matchResults,
+        };
+        docs.push(doc);
+    }
+    return docs;
+}
+
 export async function getBookingDocuments(bookings: Document[]): Promise<Document[]> {
     const docs = new Array<Document>();
     for (const book of bookings) {
@@ -219,4 +273,11 @@ export function convertDateFormat(date: Date): Date {
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
     return new Date(Date.UTC(year, month, day, hour, minutes, seconds));
+}
+
+export function convertNextDayFormat(date: Date): Date {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate() + 1;
+    return new Date(Date.UTC(year, month, day));
 }
