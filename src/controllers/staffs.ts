@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 18:40:28
+ * @LastEditTime: 2023-05-22 21:10:11
  */
 import express from 'express';
 
@@ -124,7 +124,7 @@ export const createdStaff = async (req: express.Request, res: express.Response) 
         
         const existCode = await getStaffByCode(code);
         if (existCode) {
-            return res.status(400).json({msg : '该code已存在！'});
+            return res.status(400).json({msg : '该code已存在!'});
         }
         const total = await getStaffsCount();
         

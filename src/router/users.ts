@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 21:00:57
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-17 20:09:26
+ * @LastEditTime: 2023-05-22 21:54:58
  */
 import express from 'express';
 
@@ -13,11 +13,11 @@ import { isAuthenticated, isOwner } from '../middlewares';
 
 export default(router: express.Router) => {
     // isAuthenticated,
-    router.get('/users', getAllUsers);
+    router.get('/api/users', getAllUsers);
     // isAuthenticated,
-    router.post('/users', getUsersByPage);
+    router.post('/api/users', getUsersByPage);
     // ,isAuthenticated, isOwner 
-    router.delete('/users/:id', deleteUser);
+    router.delete('/api/users/:id', deleteUser);
     // isAuthenticated, isOwner ,
-    router.patch("/users/:id", updateUser);
+    router.patch("/api/users/:id", updateUser);
 };

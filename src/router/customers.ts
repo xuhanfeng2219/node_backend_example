@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 21:00:57
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 10:37:13
+ * @LastEditTime: 2023-05-22 21:53:43
  */
 import express from 'express';
 
@@ -13,15 +13,15 @@ import { isAuthenticated, isOwner } from '../middlewares';
 import { upload } from '../db/customers';
 
 export default (router: express.Router) => {
-    router.get('/customers', getAllCustomers);
-    router.post('/customers/page', getCustomersByPage);
-    router.post('/customers', createdCustomer);
-    router.delete('/customers/:id', deleteCustomer);
-    router.post('/customers/batchdelete', deleteCustomers);
-    router.post("/customers/import", upload.single('csv'), importCustomers);
-    router.patch('/customers/:id', updateCustomer);
-    router.post('/customers/display', displayCustomers);
-    router.post('/customers/prime', primeCustomers);
-    router.post('/customers/updateCustomerMatching', updateCustomersMatchings);
-    router.patch('/customers/query/:condition', getCustomersByCondition);
+    router.get('/api/customers', getAllCustomers);
+    router.post('/api/customers/page', getCustomersByPage);
+    router.post('/api/customers', createdCustomer);
+    router.delete('/api/customers/:id', deleteCustomer);
+    router.post('/api/customers/batchdelete', deleteCustomers);
+    router.post("/api/customers/import", upload.single('csv'), importCustomers);
+    router.patch('/api/customers/:id', updateCustomer);
+    router.post('/api/customers/display', displayCustomers);
+    router.post('/api/customers/prime', primeCustomers);
+    router.post('/api/customers/updateCustomerMatching', updateCustomersMatchings);
+    router.patch('/api/customers/query/:condition', getCustomersByCondition);
 };
