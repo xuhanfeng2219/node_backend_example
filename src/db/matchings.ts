@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 19:19:03
+ * @LastEditTime: 2023-05-21 20:30:07
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -32,7 +32,6 @@ const MatchingSchema = new mongoose.Schema({
     image: { type: String, default: "" },
     note: { type: String },
     serviceIds: { type: Array<string>, default: [] },
-    services: { type: Array<Service>, default: [] }
 });
 // Serviceschema.index({Servicename: 'text', email: 'text', mobile: 'text'});
 

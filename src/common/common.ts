@@ -1,8 +1,8 @@
 import { logger } from "./log"
-import { getServiceByIds } from "../db/services"
+import { getServicesByIds, getServiceById } from "../db/services"
 import { getStaffById } from "../db/staffs"
 import { getCustomerById } from "../db/customers"
-import {getMatchingsByIds} from "../db/matchings"
+import { getMatchingsByIds } from "../db/matchings"
 import { Document } from "mongodb"
 /*
  * @Description: 
@@ -10,7 +10,7 @@ import { Document } from "mongodb"
  * @Autor: xuhanfeng
  * @Date: 2023-05-16 19:21:43
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 18:57:01
+ * @LastEditTime: 2023-05-21 20:36:57
  */
 export interface Page {
     page: number
@@ -128,7 +128,7 @@ export async function matchServices(matchings: Array<Matching>): Promise<Array<M
     for (const match of matchings) {
         const mth = new Matching();
         const serviceIds = match.serviceIds;
-        const services = await getServiceByIds(serviceIds) as Array<Service>;
+        const services = await getServicesByIds(serviceIds) as Array<Service>;
         mth._id = match._id;
         mth.code = match.code;
         mth.matchingname = match.matchingname;
@@ -158,30 +158,32 @@ export async function matchServices(matchings: Array<Matching>): Promise<Array<M
 export async function getBookingDocuments(bookings: Document[]): Promise<Document[]> {
     const docs = new Array<Document>();
     for (const book of bookings) {
-        const doc = new Document();
-        doc.createElement('_id', book._id);
-        doc.createElement('code', book.code);
-        doc.createElement('price', book.price);
-        doc.createElement('quantity', book.quantity);
-        doc.createElement('lowestPrice', book.lowestPrice);
-        doc.createElement('discount', book.discount);
-        doc.createElement('handletime', book.handletime);
-        doc.createElement('startTime', book.startTime);
-        doc.createElement('endTime', book.endTime);
-        doc.createElement('createDate', book.createDate);
-        doc.createElement('updateDate', book.updateDate);
-        doc.createElement('paystatus', book.paystatus);
-        doc.createElement('status', book.status);
-        doc.createElement('notes', book.notes);
-        doc.createElement('notes2', book.notes2);
         const staff = await getStaffById(book.staffIds[0]);
         const customer = await getCustomerById(book.customerIds[0]);
-        const services = await getServiceByIds(book.servicesIds);
+        const services = await getServicesByIds(book.serviceIds);
         const matchings = await getMatchingsByIds(book.matchingIds);
-        doc.createElement('customer', customer as Document);
-        doc.createElement('staff', staff as Document);
-        doc.createElement('services', services as Document);
-        doc.createElement('matchings', matchings as Document);
+        const doc: Document = {
+            '_id': book._id,
+            'code': book.code,
+            'price': book.price,
+            'quantity': book.quantity,
+            'lowestPrice': book.lowestPrice,
+            'discount': book.discount,
+            'handletime': book.handletime,
+            'startTime': book.startTime,
+            'endTime': book.endTime,
+            'createDate': book.createDate,
+            'updateDate': book.updateDate,
+            'paystatus': book.paystatus,
+            'status': book.status,
+            'notes': book.notes,
+            'notes2': book.notes2,
+            'customer': customer,
+            'staff': staff,
+            'services': services,
+            'matchings': matchings,
+        };
+        docs.push(doc);
     }
     return docs;
 }

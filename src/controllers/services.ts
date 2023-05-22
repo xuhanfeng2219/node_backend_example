@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 17:29:03
+ * @LastEditTime: 2023-05-21 20:24:16
  */
 import express from 'express';
 
 import { Page , PageResult, Result, Condition, convertDateFormat} from '../common/common';
 import { logger } from '../common/log';
-import { getServicesCountByCondition,getServiceByCode, createService, getServices, getServiceById, getServicesCount, deleteServiceById, deleteServicesByIds, getServiceByCondition } from '../db/services';
+import { getServicesCountByCondition,getServiceByCode, createService, getServices, getServiceById, getServicesCount, deleteServiceById, deleteServicesByIds, getServiceByCondition, getServicesByIds } from '../db/services';
 
 
 export const getAllServices = async (req: express.Request, res: express.Response) => {
@@ -109,7 +109,7 @@ export const createdService = async (req: express.Request, res: express.Response
         const existCode = await getServiceByCode(code);
         if (existCode) {
             result.code = 400;
-            result.msg = "该code已存在！";
+            result.msg = "该code已存在!";
             return res.status(400).json(result);
         }
         
@@ -167,6 +167,22 @@ export const deleteServices = async (req: express.Request, res: express.Response
     try {
         const { ids } = req.body;
         result.result = await deleteServicesByIds(ids);
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result); 
+    } catch (error) {
+        logger.error(error);
+        result.code = 400;
+        result.msg = "fail";
+        return res.status(400).json(result);
+    }
+};
+
+export const queryServicesByIds = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
+    try {
+        const { ids } = req.body;
+        result.result = await getServicesByIds(ids);
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result); 

@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:28:02
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 16:32:53
+ * @LastEditTime: 2023-05-21 19:34:18
  */
 import express from 'express';
 
@@ -14,6 +14,7 @@ import staffs from './staffs';
 import customers from './customers';
 import services from './services';
 import matchings from './matchings';
+import bookings from './bookings';
 
 export const router = express.Router();
 
@@ -24,5 +25,6 @@ export default(): express.Router => {
     customers(router);
     services(router);
     matchings(router);
+    bookings(router);
     return router;
 };

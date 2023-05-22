@@ -4,18 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-21 19:05:20
+ * @LastEditTime: 2023-05-21 20:48:12
  */
 import express from 'express';
 
-import { Page, PageResult, Result, getBookingDocuments, convertDateFormat, parseDate } from '../common/common';
+import { Page, PageResult, Result, getBookingDocuments, convertDateFormat } from '../common/common';
 import { logger } from '../common/log';
 import { getBookingsCountByCondition, getBookingByCode, createBooking, getBookings, getBookingById, getBookingsCount, deleteBookingById, deleteBookingsByIds, getBookingByCondition, getBookingsByDate } from '../db/bookings';
-import { getStaffById } from '../db/staffs';
-import { getCustomerById } from '../db/customers';
-import { getServiceByIds } from '../db/services';
-import { getMatchingsByIds } from '../db/matchings';
-import { Document } from 'mongoose';
 
 export const getAllBookings = async (req: express.Request, res: express.Response) => {
     const result = new Result();
@@ -40,8 +35,8 @@ export const getBookingsByCondition = async (req: express.Request, res: express.
         const { condition } = req.params;
         const reg = new RegExp(condition.trim(), 'i');
         const query: Page = req.body;
-        const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
-        const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
+        let page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
+        let limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getBookingsCountByCondition(reg);
         const bookings = await getBookingByCondition(reg).skip((page - 1) * limit).limit(limit);
         result.result = await getBookingDocuments(bookings);
@@ -63,8 +58,8 @@ export const getBookingsByPage = async (req: express.Request, res: express.Respo
     const result = new PageResult();
     try {
         const query: Page = req.body;
-        const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
-        const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
+        let page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
+        let limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         const total = await getBookingsCount();
         const bookings = await getBookings().skip((page - 1) * limit).limit(limit);
         result.result = await getBookingDocuments(bookings);
@@ -86,7 +81,7 @@ export const getBookingsByUpDate = async (req: express.Request, res: express.Res
     const result = new Result();
     try {
         const {date} = req.params;
-        result.result = await getBookingsByDate(parseDate(date));
+        result.result = await getBookingsByDate(convertDateFormat(new Date(date)));
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result);
@@ -142,8 +137,8 @@ export const createdBooking = async (req: express.Request, res: express.Response
             lowestPrice,
             discount,
             handletime,
-            startTime,
-            endTime,
+            startTime: convertDateFormat(new Date(startTime)),
+            endTime: convertDateFormat(new Date(endTime)),
             createDate: convertDateFormat(new Date()),
             updateDate: convertDateFormat(new Date()),
             paystatus,
@@ -236,9 +231,8 @@ export const updateBooking = async (req: express.Request, res: express.Response)
         booking.lowestPrice = lowestPrice;
         booking.discount = discount;
         booking.handletime = handletime;
-        booking.startTime = startTime;
-        booking.endTime = endTime;
-        booking.createDate = createDate;
+        booking.startTime = convertDateFormat(new Date(startTime));
+        booking.endTime = convertDateFormat(new Date(endTime));
         booking.updateDate = convertDateFormat(new Date());
         booking.paystatus = paystatus;
         booking.status = status;
