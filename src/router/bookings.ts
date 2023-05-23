@@ -4,11 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 21:00:57
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 21:53:16
+ * @LastEditTime: 2023-05-23 18:21:02
  */
 import express from 'express';
 
-import { getAllBookings, deleteBooking, updateBooking, getBookingsByPage, createdBooking, deleteBookings, getBookingsByCondition, getBookingsByUpDate } from '../controllers/bookings';
+import { getAllBookings, deleteBooking, updateBooking, getBookingsByPage, createdBooking, deleteBookings, getBookingsByCondition, getBookingsByUpDate, cancelBooking } from '../controllers/bookings';
 import { isAuthenticated, isOwner } from '../middlewares';
 import { upload } from '../db/bookings';
 
@@ -21,4 +21,5 @@ export default (router: express.Router) => {
     router.patch("/api/bookings/:id", updateBooking);
     router.patch('/api/bookings/query/:condition', getBookingsByCondition);
     router.get('/api/bookings/query_date/:date', getBookingsByUpDate);
+    router.get('/api/bookings/cancel/:id', cancelBooking);
 };

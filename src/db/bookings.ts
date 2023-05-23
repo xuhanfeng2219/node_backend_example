@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 10:21:24
+ * @LastEditTime: 2023-05-23 14:25:42
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -27,8 +27,8 @@ const BookingSchema = new mongoose.Schema({
     status: { type: String, default: "reserve" },//预约reserve、确定sure、签入checkin、临时取消cancel、未出席absent
     notes: { type: String },
     notes2: { type: String },
-    customerIds: { type: Array<String>, default: [] },
-    staffIds: { type: Array<String>, default: [] },
+    customerId: { type: String },
+    staffId: { type: String },
     serviceIds: { type: Array<String>, default: [] },
     matchingIds: { type: Array<String>, default: [] },
 });
@@ -51,6 +51,7 @@ export const getBookingsCountByCondition = (reg: RegExp) => BookingModel.count({
 export const getBookingByCondition = (reg: RegExp, page: number, limit: number) => BookingPaginateModel.paginate({ $or: [{ code: reg }] }, { page, limit });
 export const getBookingByCode = (code: string) => BookingModel.findOne({ code });
 export const getBookingById = (id: string) => BookingModel.findById({ _id: id });
+export const getBookingByCustomerIds = (customerIds: string[]) => BookingModel.find({ customerIds: customerIds });
 export const createBooking = (values: Record<string, any>) => new BookingModel(values).save().then((booking) => booking.toObject());
 export const deleteBookingById = (id: string) => BookingModel.findOneAndDelete({ _id: id });
 export const deleteBookingsByIds = (ids: string[]) => BookingModel.deleteMany({ _id: { $in: ids } });

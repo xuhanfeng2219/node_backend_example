@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 23:01:55
+ * @LastEditTime: 2023-05-23 17:04:53
  */
 import express from 'express';
 
 import { Page, PageResult, Result, Condition, Customer, parseDate, convertDateFormat, getCustomersDocumets } from '../common/common';
 import { logger } from '../common/log';
-import { getCustomersCountByCondition, getCustomersByCondition2, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, queryCustomersByCondition, createCustomers, getCustomersByLimit, CustomerDocument } from '../db/customers';
+import { getCustomersByCondition2, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, createCustomers, getCustomersByLimit, CustomerDocument } from '../db/customers';
 import csv from 'csvtojson';
 
 
@@ -19,6 +19,23 @@ export const getAllCustomers = async (req: express.Request, res: express.Respons
     try {
         const customers = await getCustomers();
         result.result = await getCustomersDocumets(customers);
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result).end();
+    } catch (error) {
+        logger.error(error);
+        result.code = 400;
+        result.msg = "fail";
+        return res.status(400).json(result);
+    }
+};
+
+export const queryCustomerById = async (req: express.Request, res: express.Response) => {
+    const result = new Result();
+    try {
+        const {id} = req.params;
+        const customers = await getCustomerById(id,"");
+        result.result = customers;
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
@@ -260,8 +277,6 @@ export const updateCustomer = async (req: express.Request, res: express.Response
             updateDate,
             isDisplay,
             isPrime,
-            matchingIds,
-            paystatus,
             balance,
         } = req.body;
         if (!code) {
@@ -270,7 +285,7 @@ export const updateCustomer = async (req: express.Request, res: express.Response
             return res.status(400).json(result);
         }
 
-        const customer = await getCustomerById(id);
+        const customer = await getCustomerById(id, "");
 
         customer.code = code;
         customer.salutation = salutation;
@@ -307,8 +322,6 @@ export const updateCustomer = async (req: express.Request, res: express.Response
         customer.updateDate = convertDateFormat(new Date());
         customer.isDisplay = isDisplay;
         customer.isPrime = isPrime;
-        customer.matchingIds = matchingIds;
-        customer.paystatus = paystatus;
         customer.balance = balance;
         await customer.save();
 
@@ -381,7 +394,7 @@ export const displayCustomers = async (req: express.Request, res: express.Respon
         const { list } = req.body;
         const customers = list as Array<Condition>;
         for (const customer of customers) {
-            const c = await getCustomerById(customer.id);
+            const c = await getCustomerById(customer.id, "");
             if (c !== null && c !== undefined && Object.keys(c).length > 0) {
                 c.isDisplay = customer.isDisplay;
                 c.updateDate = convertDateFormat(new Date());
@@ -406,9 +419,8 @@ export const updateCustomersMatchings = async (req: express.Request, res: expres
         const { list } = req.body;
         const customers = list as Array<Condition>;
         for (const customer of customers) {
-            const c = await getCustomerById(customer.id);
+            const c = await getCustomerById(customer.id,"");
             if (c !== null && c !== undefined && Object.keys(c).length > 0) {
-                c.matchingIds = customer.matchingIds;
                 c.updateDate = convertDateFormat(new Date());
                 await c.save();
             }
@@ -431,7 +443,7 @@ export const primeCustomers = async (req: express.Request, res: express.Response
         const { list } = req.body;
         const customers = list as Array<Condition>;
         for (const customer of customers) {
-            const c = await getCustomerById(customer.id);
+            const c = await getCustomerById(customer.id,"");
             if (c !== null && c !== undefined && Object.keys(c).length > 0) {
                 c.isPrime = customer.isPrime;
                 c.updateDate = convertDateFormat(new Date());

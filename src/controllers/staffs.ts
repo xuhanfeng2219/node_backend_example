@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 08:55:09
+ * @LastEditTime: 2023-05-23 17:00:49
  */
 import express from 'express';
 
@@ -260,7 +260,7 @@ export const updateStaff = async (req: express.Request, res: express.Response) =
             return res.status(400).json({msg : '请填写必填项!'});
         }
 
-        const staff = await getStaffById(id);
+        const staff = await getStaffById(id,"");
         staff.code= code;
         staff.nickname= nickname;
         staff.staffname= staffname;
@@ -319,7 +319,7 @@ export const sortStaff = async (req: express.Request, res: express.Response) => 
         const { list } = req.body;
         const staffs = list as Array<Condition>;
         for (const staff of staffs) {
-            const stf = await getStaffById(staff.id);
+            const stf = await getStaffById(staff.id,"");
             if (stf !== null && stf !== undefined && Object.keys(stf).length > 0) {
                 stf.sort = staff.sort;
                 stf.updateDate = convertDateFormat(new Date());;
@@ -344,7 +344,7 @@ export const displayStaff = async (req: express.Request, res: express.Response) 
         const { list } = req.body;
         const staffs = list as Array<Condition>;
         for (const staff of staffs) {
-            const stf = await getStaffById(staff.id);
+            const stf = await getStaffById(staff.id,"");
             if (stf !== null && stf !== undefined && Object.keys(stf).length > 0) {
                 stf.isDisplay = staff.isDisplay;
                 stf.updateDate = convertDateFormat(new Date());;

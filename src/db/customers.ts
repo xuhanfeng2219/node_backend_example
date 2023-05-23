@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 19:56:32
+ * @LastEditTime: 2023-05-23 16:53:41
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -38,7 +38,7 @@ const CustomerSchema = new mongoose.Schema({
     email: { type: String },
     address: { type: String },
     city: { type: String },
-    state: { type: String },
+    state: { type: String },//消费类型:service,matching
     postCode: { type: String },
     country: { type: String },
     contactPreference: { type: String },
@@ -50,14 +50,12 @@ const CustomerSchema = new mongoose.Schema({
     updateDate: { type: Date },
     isDisplay: { type: String, default: "Yes" },
     isPrime: { type: String, default: "No" },
-    matchingIds: { type: Array<String>, default: [] },
-    paystatus: { type: String, default: "Unpaid" },
     balance: { type: Number, default: 0 }
 });
 
 // CustomerSchema.index({lastname: 'text', ICNo: 'text', email: 'text', code: 'text'});
 CustomerSchema.plugin(mongoosePaginate);
-const selectFileds = "_id code lastname mobile ICNo matchingIds createDate updateDate";
+const selectFileds = "_id code firstname lastname  mobile ICNo isPrime isDisplay joinDate createDate updateDate";
 export interface CustomerDocument extends mongoose.Document { }
 
 export const CustomerModel = mongoose.model('Customer', CustomerSchema);
@@ -71,7 +69,7 @@ export const getCustomersByCondition2 = (reg: RegExp, page: number, limit: numbe
 export const queryCustomersByCondition = (reg: RegExp, page: number, limit: number) => CustomerModel.find({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] }).skip((page - 1) * limit).limit(limit).exec();
 export const getCustomerByMobile = (mobile: string) => CustomerModel.findOne({ mobile: mobile });
 export const getCustomerByICNo = (icNo: string) => CustomerModel.findOne({ ICNo: icNo });
-export const getCustomerById = (id: string) => CustomerModel.findById({ _id: id });
+export const getCustomerById = (id: string, fields: string) => CustomerModel.findById({ _id: id }).select(fields);
 export const createCustomer = (values: Record<string, any>) => new CustomerModel(values).save().then((customer) => customer.toObject());
 export const deleteCustomerById = (id: string) => CustomerModel.findOneAndDelete({ _id: id });
 export const deleteCustomersByIds = (ids: string[]) => CustomerModel.deleteMany({ _id: { $in: ids } });

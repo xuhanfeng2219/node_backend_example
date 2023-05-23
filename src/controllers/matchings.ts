@@ -4,13 +4,14 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 10:09:01
+ * @LastEditTime: 2023-05-23 16:15:10
  */
 import express from 'express';
 
 import { Page, PageResult, Result, Condition, convertDateFormat, Matching, matchServices } from '../common/common';
 import { logger } from '../common/log';
-import { getMatchingByCode, createMatching, getMatchings, getMatchingById, deleteMatchingById, deleteMatchingsByIds, getMatchingByCondition, getMatchingsByLimit } from '../db/matchings';
+import { getMatchingByCode, createMatching, getMatchings, getMatchingById, deleteMatchingById, deleteMatchingsByIds, getMatchingByCondition, getMatchingsByLimit, getMatchingsByIds } from '../db/matchings';
+import { getServicesByIds } from '../db/services';
 
 export const getAllMatchings = async (req: express.Request, res: express.Response) => {
     const result = new Result();
@@ -76,6 +77,31 @@ export const getMatchingsByPage = async (req: express.Request, res: express.Resp
     }
 };
 
+export const queryMatchingsByIds = async (req: express.Request, res: express.Response) => {
+    const result = new PageResult();
+    try {
+        const { matchingIds } = req.body;
+        // const total = await getMatchingsCount();
+        const matchings = await getMatchingsByIds(matchingIds);
+        for (const match of matchings) {
+            const services = await getServicesByIds(match.serviceIds);
+            match.serviceIds = services;
+        }
+        result.result = matchings;
+        // result.total = total;
+        // result.page = page;
+        // result.limit = limit;
+        result.code = 200;
+        result.msg = "success";
+        return res.status(200).json(result);
+    } catch (error) {
+        logger.error(error);
+        result.code = 400;
+        result.msg = "fail";
+        return res.status(400).json(result);
+    }
+};
+
 export const createdMatching = async (req: express.Request, res: express.Response) => {
     const result = new Result();
     try {
@@ -100,7 +126,7 @@ export const createdMatching = async (req: express.Request, res: express.Respons
             status,
             image,
             note,
-            serviceIds
+            services
         } = req.body;
         if (!code || !matchingname) {
             result.code = 400;
@@ -111,7 +137,7 @@ export const createdMatching = async (req: express.Request, res: express.Respons
         const existCode = await getMatchingByCode(code);
         if (existCode) {
             result.code = 400;
-            result.msg = "该code已存在！";
+            result.msg = "该code已存在!";
             return res.status(400).json(result);
         }
 
@@ -135,7 +161,7 @@ export const createdMatching = async (req: express.Request, res: express.Respons
             status,
             image,
             note,
-            serviceIds
+            services
         });
         result.code = 200;
         result.msg = "success";

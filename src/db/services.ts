@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 09:10:43
+ * @LastEditTime: 2023-05-23 16:15:39
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -28,7 +28,7 @@ const ServiceSchema = new mongoose.Schema({
     isDisplay: { type: String, default: "Yes" },
     createDate: { type: Date },
     updateDate: { type: Date },
-    status: { type: String },
+    status: { type: String },//状态一次消费
     image: { type: String, default: "" },
     note: { type: String }
 });
@@ -46,7 +46,7 @@ export const getServicesCountByCondition = (reg: RegExp) => ServiceModel.count({
 export const getServiceByCondition = (reg: RegExp, page: number, limit: number) => ServicePaginateModel.paginate({ $or: [{ servicename: reg }, { code: reg }] }, { page, limit, select: selectFileds });
 export const getServiceByCode = (code: string) => ServiceModel.findOne({ code });
 export const getServiceById = (id: string) => ServiceModel.findById({ _id: id });
-export const getServicesByIds = (ids: Array<string>) => ServiceModel.find({ _id: { $in: ids } });
+export const getServicesByIds = (ids: Array<string>) => ServiceModel.find({ _id: { $in: ids } }).select(selectFileds);
 export const createService = (values: Record<string, any>) => new ServiceModel(values).save().then((service) => service.toObject());
 export const deleteServiceById = (id: string) => ServiceModel.findOneAndDelete({ _id: id });
 export const deleteServicesByIds = (ids: string[]) => ServiceModel.deleteMany({ _id: { $in: ids } });

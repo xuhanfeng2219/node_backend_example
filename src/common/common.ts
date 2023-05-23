@@ -1,17 +1,19 @@
-import { logger } from "./log"
-import { getServicesByIds } from "../db/services"
-import { getStaffById } from "../db/staffs"
-import { getCustomerById } from "../db/customers"
-import { getMatchingsByIds } from "../db/matchings"
-import { Document } from "mongodb"
 /*
  * @Description: 
  * @Version: 1.0
  * @Autor: xuhanfeng
  * @Date: 2023-05-16 19:21:43
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 11:10:24
+ * @LastEditTime: 2023-05-23 16:59:49
  */
+
+import { logger } from "./log"
+import { getServicesByIds } from "../db/services"
+import { getStaffById } from "../db/staffs"
+import { getCustomerById } from "../db/customers"
+import { getMatchingsByIds } from "../db/matchings"
+import { Document } from "mongodb"
+
 export interface Page {
     page: number
     limit: number
@@ -212,8 +214,8 @@ export async function getCustomersDocumets(customers: Document[]): Promise<Docum
 export async function getBookingDocuments(bookings: Document[]): Promise<Document[]> {
     const docs = new Array<Document>();
     for (const book of bookings) {
-        const staff = await getStaffById(book.staffIds[0]);
-        const customer = await getCustomerById(book.customerIds[0]);
+        const staff = await getStaffById(book.staffIds,"");
+        const customer = await getCustomerById(book.customerIds, "");
         const services = await getServicesByIds(book.serviceIds);
         const matchings = await getMatchingsByIds(book.matchingIds);
         const doc: Document = {

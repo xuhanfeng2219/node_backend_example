@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 08:58:13
+ * @LastEditTime: 2023-05-23 16:59:38
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -56,7 +56,7 @@ const StaffSchema = new mongoose.Schema({
 });
 // StaffSchema.index({staffname: 'text', email: 'text', mobile: 'text'});
 StaffSchema.plugin(mongoosePaginate);
-const selectFileds = "_id code staffname mobile sort isDisplay createDate updateDate";
+const selectFileds = "_id code staffname image mobile sort isDisplay createDate updateDate";
 export interface StaffDocument extends mongoose.Document { };
 export const StaffPaginateModel = mongoose.model<StaffDocument, mongoose.PaginateModel<StaffDocument>>('Staff', StaffSchema);
 export const StaffModel = mongoose.model('Staff', StaffSchema);
@@ -68,7 +68,7 @@ export const getStaffsCount = () => StaffModel.count();
 export const getStaffsCountByCondition = (reg: RegExp) => StaffModel.count({ $or: [{ staffname: reg }, { code: reg }] });
 export const getStaffByCondition = (reg: RegExp, page: number, limit: number) => StaffPaginateModel.paginate({ $or: [{ staffname: reg }, { code: reg }] }, { page, limit, select: selectFileds });
 export const getStaffByCode = (code: string) => StaffModel.findOne({ code });
-export const getStaffById = (id: string) => StaffModel.findById({ _id: id });
+export const getStaffById = (id: string, fields: string) => StaffModel.findById({ _id: id }).select(fields);
 export const createStaff = (values: Record<string, any>) => new StaffModel(values).save().then((staff) => staff.toObject());
 export const deleteStaffById = (id: string) => StaffModel.findOneAndDelete({ _id: id });
 export const deleteStaffsByIds = (ids: string[]) => StaffModel.deleteMany({ _id: { $in: ids } });
