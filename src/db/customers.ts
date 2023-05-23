@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 16:53:41
+ * @LastEditTime: 2023-05-23 19:42:26
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -66,7 +66,7 @@ export const getCustomersByLimit = (page: number, limit: number) => CustomerPagi
 export const getCustomersCount = () => CustomerModel.count();
 export const getCustomersCountByCondition = (reg: RegExp) => CustomerModel.count({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] });
 export const getCustomersByCondition2 = (reg: RegExp, page: number, limit: number) => CustomerPaginateModel.paginate({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] }, { page, limit, select: selectFileds });
-export const queryCustomersByCondition = (reg: RegExp, page: number, limit: number) => CustomerModel.find({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] }).skip((page - 1) * limit).limit(limit).exec();
+export const queryCustomersByCondition = (reg: RegExp, page: number, limit: number) => CustomerPaginateModel.paginate({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] }, { page, limit, select: selectFileds });
 export const getCustomerByMobile = (mobile: string) => CustomerModel.findOne({ mobile: mobile });
 export const getCustomerByICNo = (icNo: string) => CustomerModel.findOne({ ICNo: icNo });
 export const getCustomerById = (id: string, fields: string) => CustomerModel.findById({ _id: id }).select(fields);
