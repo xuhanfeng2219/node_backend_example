@@ -4,10 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 18:40:10
+ * @LastEditTime: 2023-05-23 08:58:13
  */
 import mongoose from "mongoose";
 import multer from "multer";
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const StaffSchema = new mongoose.Schema({
     // 概览
@@ -54,14 +55,18 @@ const StaffSchema = new mongoose.Schema({
     status: { type: String }
 });
 // StaffSchema.index({staffname: 'text', email: 'text', mobile: 'text'});
-
+StaffSchema.plugin(mongoosePaginate);
+const selectFileds = "_id code staffname mobile sort isDisplay createDate updateDate";
+export interface StaffDocument extends mongoose.Document { };
+export const StaffPaginateModel = mongoose.model<StaffDocument, mongoose.PaginateModel<StaffDocument>>('Staff', StaffSchema);
 export const StaffModel = mongoose.model('Staff', StaffSchema);
 
+
 export const getStaffs = () => StaffModel.find().sort({ sort: 1 });
-export const getStaffsByLimit = (page: number, limit: number) => StaffModel.find().sort({ sort: 1 }).skip((page - 1) * limit).limit(limit).exec();
+export const getStaffsByLimit = (page: number, limit: number) => StaffPaginateModel.paginate({}, { page, limit, select: selectFileds });
 export const getStaffsCount = () => StaffModel.count();
 export const getStaffsCountByCondition = (reg: RegExp) => StaffModel.count({ $or: [{ staffname: reg }, { code: reg }] });
-export const getStaffByCondition = (reg: RegExp, page: number, limit: number) => StaffModel.find({ $or: [{ staffname: reg }, { code: reg }] }).skip((page - 1) * limit).limit(limit).exec();
+export const getStaffByCondition = (reg: RegExp, page: number, limit: number) => StaffPaginateModel.paginate({ $or: [{ staffname: reg }, { code: reg }] }, { page, limit, select: selectFileds });
 export const getStaffByCode = (code: string) => StaffModel.findOne({ code });
 export const getStaffById = (id: string) => StaffModel.findById({ _id: id });
 export const createStaff = (values: Record<string, any>) => new StaffModel(values).save().then((staff) => staff.toObject());

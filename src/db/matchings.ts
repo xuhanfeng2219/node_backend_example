@@ -4,10 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 23:08:42
+ * @LastEditTime: 2023-05-23 09:11:07
  */
 import mongoose from "mongoose";
 import multer from "multer";
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const MatchingSchema = new mongoose.Schema({
     // 概览
@@ -33,14 +34,17 @@ const MatchingSchema = new mongoose.Schema({
     serviceIds: { type: Array<string>, default: [] },
 });
 // Serviceschema.index({Servicename: 'text', email: 'text', mobile: 'text'});
-
+MatchingSchema.plugin(mongoosePaginate);
+const selectFileds = "_id code matchingname category group cost price isDisplay isFavorite createDate updateDate";
+export interface MatchingDocument extends mongoose.Document { };
+export const MatchingPaginateModel = mongoose.model<MatchingDocument, mongoose.PaginateModel<MatchingDocument>>('Matching', MatchingSchema);
 export const MatchingModel = mongoose.model('Matching', MatchingSchema);
 
 export const getMatchings = () => MatchingModel.find();
-export const getMatchingsByLimit = (page: number, limit: number) => MatchingModel.find().skip((page - 1) * limit).limit(limit).exec();
+export const getMatchingsByLimit = (page: number, limit: number) => MatchingPaginateModel.paginate({}, { page, limit, select: selectFileds });
 export const getMatchingsCount = () => MatchingModel.count();
 export const getMatchingsCountByCondition = (reg: RegExp) => MatchingModel.count({ $or: [{ matchingname: reg }, { code: reg }] });
-export const getMatchingByCondition = (reg: RegExp, page: number, limit: number) => MatchingModel.find({ $or: [{ matchingname: reg }, { code: reg }] }).skip((page - 1) * limit).limit(limit).exec();
+export const getMatchingByCondition = (reg: RegExp, page: number, limit: number) => MatchingPaginateModel.paginate({ $or: [{ matchingname: reg }, { code: reg }] }, { page, limit, select: selectFileds });
 export const getMatchingByCode = (code: string) => MatchingModel.findOne({ code });
 export const getMatchingById = (id: string) => MatchingModel.findById({ _id: id });
 export const getMatchingsByIds = (ids: Array<string>) => MatchingModel.find({ _id: { $in: ids } });

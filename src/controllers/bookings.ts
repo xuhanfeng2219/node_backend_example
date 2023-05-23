@@ -4,13 +4,15 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 20:25:25
+ * @LastEditTime: 2023-05-23 10:32:25
  */
 import express from 'express';
 
-import { Page, PageResult, Result, getBookingDocuments, convertDateFormat, convertNextDayFormat } from '../common/common';
+import { Page, PageResult, Result, getBookingDocuments, convertDateFormat, convertNextDayFormat, Service } from '../common/common';
 import { logger } from '../common/log';
-import { getBookingsCountByCondition, getBookingByCode, createBooking, getBookings, getBookingById, getBookingsCount, deleteBookingById, deleteBookingsByIds, getBookingByCondition, getBookingsByDate, getBookingsByLimt } from '../db/bookings';
+import {  getBookingByCode, createBooking, getBookings, getBookingById, deleteBookingById, deleteBookingsByIds, getBookingByCondition, getBookingsByDate, getBookingsByLimt } from '../db/bookings';
+import { getMatchingsByIds } from '../db/matchings';
+import { getServicesByIds } from '../db/services';
 
 export const getAllBookings = async (req: express.Request, res: express.Response) => {
     const result = new Result();
@@ -37,12 +39,11 @@ export const getBookingsByCondition = async (req: express.Request, res: express.
         const query: Page = req.body;
         let page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         let limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
-        const total = await getBookingsCountByCondition(reg);
         const bookings = await getBookingByCondition(reg, page, limit);
-        result.result = await getBookingDocuments(bookings);
-        result.total = total;
-        result.page = page;
-        result.limit = limit;
+        result.result = bookings;
+        // result.total = total;
+        // result.page = page;
+        // result.limit = limit;
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
@@ -60,12 +61,12 @@ export const getBookingsByPage = async (req: express.Request, res: express.Respo
         const query: Page = req.body;
         let page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         let limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
-        const total = await getBookingsCount();
-        const bookings = await getBookingsByLimt(page, limit);
-        result.result = await getBookingDocuments(bookings);
-        result.total = total;
-        result.page = page;
-        result.limit = limit;
+        // const total = await getBookingsCount();
+        // const bookings = await getBookingsByLimt(page, limit);
+        result.result = await getBookingsByLimt(page, limit);
+        // result.total = total;
+        // result.page = page;
+        // result.limit = limit;
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result);
@@ -114,8 +115,8 @@ export const createdBooking = async (req: express.Request, res: express.Response
             notes2,
             customerIds,
             staffIds,
-            serviceIds,
-            matchingIds,
+            services,
+            matchings,
         } = req.body;
         if (!code) {
             result.code = 400;
@@ -128,6 +129,12 @@ export const createdBooking = async (req: express.Request, res: express.Response
             result.code = 400;
             result.msg = "该code已存在!";
             return res.status(400).json(result);
+        }
+
+        const matchingIds: string[] = [];
+        const serviceIds: string[] = [];
+        for(const matching of matchings) {
+            
         }
 
         result.result = await createBooking({
@@ -150,7 +157,11 @@ export const createdBooking = async (req: express.Request, res: express.Response
             serviceIds,
             matchingIds,
         });
-        // 创建扣减服务次数
+        // 创建扣减服务次数,这个不是单纯添加ID服务性质不一样
+        // const matchings = await getMatchingsByIds(matchingIds);
+        // for (const match of matchings) {
+
+        // }
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
