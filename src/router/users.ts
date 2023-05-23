@@ -4,20 +4,20 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 21:00:57
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 21:54:58
+ * @LastEditTime: 2023-05-23 08:25:08
  */
 import express from 'express';
 
 import { getAllUsers, deleteUser, updateUser, getUsersByPage } from '../controllers/users';
 import { isAuthenticated, isOwner } from '../middlewares';
 
-export default(router: express.Router) => {
+export default (router: express.Router) => {
     // isAuthenticated,
-    router.get('/api/users', getAllUsers);
+    router.get('/api/users', isAuthenticated, getAllUsers);
     // isAuthenticated,
-    router.post('/api/users', getUsersByPage);
+    router.post('/api/users', isAuthenticated, getUsersByPage);
     // ,isAuthenticated, isOwner 
-    router.delete('/api/users/:id', deleteUser);
+    router.delete('/api/users/:id', isAuthenticated, isOwner, deleteUser);
     // isAuthenticated, isOwner ,
-    router.patch("/api/users/:id", updateUser);
+    router.patch("/api/users/:id", isOwner, updateUser);
 };

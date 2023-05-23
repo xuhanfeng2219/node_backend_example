@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:16:05
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-19 15:43:45
+ * @LastEditTime: 2023-05-22 23:28:16
  */
 import express from 'express';
 
@@ -74,7 +74,7 @@ export const login = async (req: express.Request, res: express.Response) => {
             return res.status(400).json(result);
         }
 
-        const exceptHash = await authentication(user.authentication.salt, password);
+        const exceptHash = authentication(user.authentication.salt, password);
 
         if (user.authentication.password !== exceptHash) {
             result.code = 403;

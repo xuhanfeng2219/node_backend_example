@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 21:50:38
+ * @LastEditTime: 2023-05-22 23:01:55
  */
 import express from 'express';
 
@@ -205,7 +205,7 @@ export const getCustomersByCondition = async (req: express.Request, res: express
         // const total = await getCustomersCountByCondition(reg);
         // const customers = await queryCustomersByCondition(reg, page, limit);
         // result.result = await getCustomersDocumets(customers);
-        result.result = (await getCustomersByCondition2(reg, page, limit)).docs;
+        result.result = await getCustomersByCondition2(reg, page, limit);
         // result.total = total;
         // result.page = page;
         // result.limit = limit;
