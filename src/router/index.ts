@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:28:02
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-24 13:24:24
+ * @LastEditTime: 2023-05-24 15:16:07
  */
 import express from 'express';
 
@@ -16,6 +16,7 @@ import services from './services';
 import matchings from './matchings';
 import bookings from './bookings';
 import prime_match from './prime_match';
+import category from './category';
 
 export const router = express.Router();
 
@@ -28,5 +29,6 @@ export default(): express.Router => {
     matchings(router);
     bookings(router);
     prime_match(router);
+    category(router);
     return router;
 };
