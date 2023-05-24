@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 16:59:38
+ * @LastEditTime: 2023-05-24 17:15:32
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -73,5 +73,6 @@ export const createStaff = (values: Record<string, any>) => new StaffModel(value
 export const deleteStaffById = (id: string) => StaffModel.findOneAndDelete({ _id: id });
 export const deleteStaffsByIds = (ids: string[]) => StaffModel.deleteMany({ _id: { $in: ids } });
 export const updateStaffById = (id: string, values: Record<string, any>) => StaffModel.findByIdAndUpdate(id, values);
+export const getStaffIdsByCondition = (reg: RegExp, field: string) => StaffModel.find({ $or: [{ staffname: reg }, { code: reg }] }).select(field);
 
 export const upload = multer({ dest: 'uploads/staff/' });

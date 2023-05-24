@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-24 09:30:27
+ * @LastEditTime: 2023-05-24 17:19:34
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -74,6 +74,7 @@ export const deleteCustomerById = (id: string) => CustomerModel.findOneAndDelete
 export const deleteCustomersByIds = (ids: string[]) => CustomerModel.deleteMany({ _id: { $in: ids } });
 export const updateCustomerById = (id: string, values: Record<string, any>) => CustomerModel.findByIdAndUpdate(id, values);
 export const createCustomers = (values: Record<string, any>[]) => CustomerModel.insertMany(values);
+export const getCustomerIdsByCondition = (reg: RegExp, field: string) => CustomerModel.find({ $or: [{ lastname: reg }, { code: reg }] }).select(field);
 
 // 配置 Multer 中间件
 // const storage = multer.memoryStorage();

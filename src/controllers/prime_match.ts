@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-24 13:24:59
+ * @LastEditTime: 2023-05-24 16:56:53
  */
 import express from 'express';
 
@@ -12,6 +12,7 @@ import { Page, PageResult, Result, convertDateFormat } from '../common/common';
 import { logger } from '../common/log';
 import { getCustomerById } from '../db/customers';
 import { getMatchingById } from '../db/matchings';
+import { createOrder } from '../db/orders';
 import { createPrimeMatching, deletePrimeMatchingById, deletePrimeMatchingsByIds, getPrimeMatchingById, getPrimeMatchingsByLimit } from '../db/prime_match';
 import { getStaffById } from '../db/staffs';
 
@@ -95,9 +96,23 @@ export const createdPrimeMatching = async (req: express.Request, res: express.Re
         });
         // 更新会员状态
         const customer = await getCustomerById(customerId, "");
-        customer.isPrime = 'Yes';
-        await customer.save();
+        if (customer.isPrime === 'No') {
+            customer.isPrime = 'Yes';
+            await customer.save();
+        }
         // 产生销售记录,插入销售单
+        await createOrder({
+            customerId,
+            staffId,
+            matching,
+            buyDate: convertDateFormat(new Date()),
+            usestatus: 'Unuse',
+            incomeSource: 'matching',
+            paystatus: 'paid',
+            createDate: convertDateFormat(new Date()),
+            updateDate: convertDateFormat(new Date()),
+            status: 'add'
+        });
 
         result.code = 200;
         result.msg = "success";
@@ -182,6 +197,18 @@ export const updatePrimeMatching = async (req: express.Request, res: express.Res
         await primeMatch.save();
 
         // 产生销售记录,插入销售单
+        await createOrder({
+            customerId,
+            staffId,
+            matching,
+            buyDate: convertDateFormat(new Date()),
+            usestatus: 'Unuse',
+            incomeSource: 'matching',
+            paystatus: 'paid',
+            createDate: convertDateFormat(new Date()),
+            updateDate: convertDateFormat(new Date()),
+            status: 'update'
+        });
 
         result.code = 200;
         result.msg = "success";

@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 14:25:42
+ * @LastEditTime: 2023-05-24 17:51:45
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -29,8 +29,8 @@ const BookingSchema = new mongoose.Schema({
     notes2: { type: String },
     customerId: { type: String },
     staffId: { type: String },
-    serviceIds: { type: Array<String>, default: [] },
-    matchingIds: { type: Array<String>, default: [] },
+    serviceId: { type: String },
+    matchingId: { type: String },
 });
 // Serviceschema.index({Servicename: 'text', email: 'text', mobile: 'text'});
 BookingSchema.plugin(mongoosePaginate);

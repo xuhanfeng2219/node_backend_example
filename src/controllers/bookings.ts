@@ -4,17 +4,17 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 18:03:47
+ * @LastEditTime: 2023-05-24 17:55:03
  */
 import express from 'express';
 
-import { Page, PageResult, Result, getBookingDocuments, convertDateFormat, convertNextDayFormat, Service, Customer } from '../common/common';
+import { Page, PageResult, Result, convertDateFormat, convertNextDayFormat, getBookingDocuments } from '../common/common';
 import { logger } from '../common/log';
-import {  getBookingByCode, createBooking, getBookings, getBookingById, deleteBookingById, deleteBookingsByIds, getBookingByCondition, getBookingsByDate, getBookingsByLimt } from '../db/bookings';
+import { createBooking, deleteBookingById, deleteBookingsByIds, getBookingByCode, getBookingByCondition, getBookingById, getBookings, getBookingsByDate, getBookingsByLimt } from '../db/bookings';
 import { getCustomerById } from '../db/customers';
+import { getMatchingById, getMatchingsByIds } from '../db/matchings';
+import { getServiceById, getServicesByIds } from '../db/services';
 import { getStaffById } from '../db/staffs';
-import { getMatchingsByIds } from '../db/matchings';
-import { getServicesByIds } from '../db/services';
 
 export const getAllBookings = async (req: express.Request, res: express.Response) => {
     const result = new Result();
@@ -44,14 +44,11 @@ export const getBookingsByCondition = async (req: express.Request, res: express.
         const bookings = await getBookingByCondition(reg, page, limit);
         for (const book of bookings.docs) {
             const customer = await getCustomerById(book.get('customerId'), "firstname lastname");
-            const staff = await getStaffById(book.get('staffId'),"staffname");
+            const staff = await getStaffById(book.get('staffId'), "staffname");
             book.set('customerId', customer);
             book.set('staffId', staff);
         }
         result.result = bookings;
-        // result.total = total;
-        // result.page = page;
-        // result.limit = limit;
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
@@ -69,19 +66,14 @@ export const getBookingsByPage = async (req: express.Request, res: express.Respo
         const query: Page = req.body;
         let page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         let limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
-        // const total = await getBookingsCount();
-        // const bookings = await getBookingsByLimt(page, limit);
         const bookings = await getBookingsByLimt(page, limit);
         for (const book of bookings.docs) {
             const customer = await getCustomerById(book.get('customerId'), "firstname lastname");
-            const staff = await getStaffById(book.get('staffId'),"staffname");
+            const staff = await getStaffById(book.get('staffId'), "staffname");
             book.set('customerId', customer);
             book.set('staffId', staff);
         }
         result.result = bookings;
-        // result.total = total;
-        // result.page = page;
-        // result.limit = limit;
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result);
@@ -133,6 +125,7 @@ export const createdBooking = async (req: express.Request, res: express.Response
             serviceIds,
             matchingIds,
         } = req.body;
+
         if (!code) {
             result.code = 400;
             result.msg = "请填写必填项!";
@@ -148,7 +141,7 @@ export const createdBooking = async (req: express.Request, res: express.Response
         // 判断参数为空
         if ((!serviceIds || serviceIds.length === 0) && (!matchingIds || matchingIds.length === 0)) {
             result.code = 400;
-            result.msg="请添加必要的服务或者配套";
+            result.msg = "请添加必要的服务或者配套";
             result.result = {};
             return res.status(400).json(result);
         }
@@ -158,7 +151,7 @@ export const createdBooking = async (req: express.Request, res: express.Response
         // 判断服务是否为空
         if ((!services || services.length === 0) && (!matchings || matchings.length === 0)) {
             result.code = 400;
-            result.msg="请添加必要的服务或者配套";
+            result.msg = "请添加必要的服务或者配套";
             result.result = {};
             return res.status(400).json(result);
         }
@@ -183,7 +176,7 @@ export const createdBooking = async (req: express.Request, res: express.Response
             serviceIds,
             matchingIds,
         });
-        
+
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
@@ -208,6 +201,7 @@ export const deleteBooking = async (req: express.Request, res: express.Response)
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
+        result.result = error.message;
         return res.status(400).json(result);
     }
 };
@@ -224,6 +218,7 @@ export const deleteBookings = async (req: express.Request, res: express.Response
         logger.error(error);
         result.code = 400;
         result.msg = "fail";
+        result.result = error.message;
         return res.status(400).json(result);
     }
 };
@@ -249,8 +244,8 @@ export const updateBooking = async (req: express.Request, res: express.Response)
             notes2,
             customerId,
             staffId,
-            serviceIds,
-            matchingIds,
+            serviceId,
+            matchingId,
         } = req.body;
 
         if (!code) {
@@ -260,19 +255,19 @@ export const updateBooking = async (req: express.Request, res: express.Response)
         }
 
         // 判断参数为空
-        if ((!serviceIds || serviceIds.length === 0) && (!matchingIds || matchingIds.length === 0)) {
+        if ((!serviceId || serviceId.length === 0) && (!matchingId || matchingId.length === 0)) {
             result.code = 400;
-            result.msg="请添加必要的服务或者配套";
+            result.msg = "请添加必要的服务或者配套";
             result.result = {};
             return res.status(400).json(result);
         }
 
-        const services = await getServicesByIds(serviceIds);
-        const matchings = await getMatchingsByIds(matchingIds);
+        const service = await getServiceById(serviceId);
+        const matching = await getMatchingById(matchingId);
         // 判断服务是否为空
-        if ((!services || services.length === 0) && (!matchings || matchings.length === 0)) {
+        if ((!service || Object.keys(service).length === 0) && (!matching || Object.keys(matching).length === 0)) {
             result.code = 400;
-            result.msg="请添加必要的服务或者配套";
+            result.msg = "请添加必要的服务或者配套";
             result.result = {};
             return res.status(400).json(result);
         }
@@ -293,8 +288,8 @@ export const updateBooking = async (req: express.Request, res: express.Response)
         booking.notes2 = notes2;
         booking.customerId = customerId;
         booking.staffId = staffId;
-        booking.serviceIds = serviceIds;
-        booking.matchingIds = matchingIds;
+        booking.serviceId = serviceId;
+        booking.matchingId = matchingId;
 
         await booking.save();
         result.code = 200;
@@ -313,7 +308,7 @@ export const cancelBooking = async (req: express.Request, res: express.Response)
     const result = new Result();
     try {
         const { id } = req.params;
-        
+
         if (!id) {
             result.code = 400;
             result.msg = "请添加必要的请求ID!";
