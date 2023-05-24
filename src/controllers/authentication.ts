@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:16:05
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-22 23:28:16
+ * @LastEditTime: 2023-05-24 11:34:01
  */
 import express from 'express';
 
@@ -93,6 +93,7 @@ export const login = async (req: express.Request, res: express.Response) => {
 
         result.code = 200;
         result.msg = "success";
+        result.result = {'_id': user._id};
         return res.status(200).json(result).end();
          
     } catch (error) {

@@ -4,11 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 17:00:49
+ * @LastEditTime: 2023-05-24 09:20:06
  */
 import express from 'express';
 
-import { Page , PageResult, Result, Condition, convertDateFormat} from '../common/common';
+import { Page, PageResult, Result, Condition, convertDateFormat } from '../common/common';
 import { logger } from '../common/log';
 import { getStaffByCode, createStaff, getStaffs, getStaffById, getStaffsCount, deleteStaffById, deleteStaffsByIds, getStaffByCondition, getStaffsByLimit } from '../db/staffs';
 
@@ -32,7 +32,7 @@ export const getStaffsByCondition = async (req: express.Request, res: express.Re
     const result = new PageResult();
     try {
         const { condition } = req.params;
-        const reg = new RegExp(condition.trim(),'i');
+        const reg = new RegExp(condition.trim(), 'i');
         const query: Page = req.body;
         const page = query.page === 0 || Object.keys(query).length === 0 ? 1 : query.page;
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
@@ -63,7 +63,8 @@ export const getStaffsByPage = async (req: express.Request, res: express.Respons
         // result.result = staffs;
         // result.total = total;
         // result.page = page;
-        result.limit = limit;
+        // result.limit = limit;
+        result.result = staffs;
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result);
@@ -79,7 +80,7 @@ export const createdStaff = async (req: express.Request, res: express.Response) 
     const result = new Result();
     try {
         const { filename, path } = req.file;
-        const { 
+        const {
             code,
             nickname,
             staffname,
@@ -119,15 +120,15 @@ export const createdStaff = async (req: express.Request, res: express.Response) 
             updateDate,
             status } = req.body;
         if (!code || !staffname || !colorCode) {
-            return res.status(400).json({msg : '请填写必填项!'});
+            return res.status(400).json({ msg: '请填写必填项!' });
         }
-        
+
         const existCode = await getStaffByCode(code);
         if (existCode) {
-            return res.status(400).json({msg : '该code已存在!'});
+            return res.status(400).json({ msg: '该code已存在!' });
         }
         const total = await getStaffsCount();
-        
+
         result.result = await createStaff({
             code,
             nickname,
@@ -142,7 +143,7 @@ export const createdStaff = async (req: express.Request, res: express.Response) 
             startJobDate,
             endJobDate,
             endProbationDate,
-            image : `/uploads/staffs/${filename}`,
+            image: `/uploads/staffs/${filename}`,
             faith,
             isDisplay,
             mobile,
@@ -171,7 +172,7 @@ export const createdStaff = async (req: express.Request, res: express.Response) 
         result.code = 200;
         result.msg = "success";
         return res.status(200).json(result).end();
-        
+
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -188,7 +189,7 @@ export const deleteStaff = async (req: express.Request, res: express.Response) =
         result.result = await deleteStaffById(id);
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result); 
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -204,7 +205,7 @@ export const deleteStaffs = async (req: express.Request, res: express.Response) 
         result.result = await deleteStaffsByIds(ids);
         result.code = 200;
         result.msg = "success";
-        return res.status(200).json(result); 
+        return res.status(200).json(result);
     } catch (error) {
         logger.error(error);
         result.code = 400;
@@ -217,7 +218,7 @@ export const updateStaff = async (req: express.Request, res: express.Response) =
     const result = new Result();
     try {
         const { id } = req.params;
-        const { 
+        const {
             code,
             nickname,
             staffname,
@@ -257,49 +258,49 @@ export const updateStaff = async (req: express.Request, res: express.Response) =
             updateDate,
             status } = req.body;
         if (!code || !staffname || !colorCode) {
-            return res.status(400).json({msg : '请填写必填项!'});
+            return res.status(400).json({ msg: '请填写必填项!' });
         }
 
-        const staff = await getStaffById(id,"");
-        staff.code= code;
-        staff.nickname= nickname;
-        staff.staffname= staffname;
-        staff.surname= surname;
-        staff.fin= fin;
-        staff.gender= gender;
-        staff.birthday= birthday;
-        staff.race= race;
-        staff.nationality= nationality;
-        staff.title= title;
-        staff.startJobDate= startJobDate;
-        staff.endJobDate= endJobDate;
-        staff.endProbationDate= endProbationDate;
-        staff.image= image;
-        staff.faith= faith;
-        staff.isDisplay= isDisplay;
-        staff.mobile= mobile;
-        staff.homePhone= homePhone;
-        staff.officeCall= officeCall;
-        staff.otherCall= otherCall;
-        staff.faxNumer= faxNumer;
-        staff.email= email;
-        staff.localAddress= localAddress;
-        staff.localCity= localCity;
-        staff.localPostCode= localPostCode;
-        staff.otherAddress= otherAddress;
-        staff.otherCity= otherCity;
-        staff.otherPostCode= otherPostCode;
-        staff.localState= localState;
-        staff.localCountry= localCountry;
-        staff.otherState= otherState;
-        staff.otherCountry= otherCountry;
-        staff.colorCode= colorCode;
-        staff.remark= remark;
+        const staff = await getStaffById(id, "");
+        staff.code = code;
+        staff.nickname = nickname;
+        staff.staffname = staffname;
+        staff.surname = surname;
+        staff.fin = fin;
+        staff.gender = gender;
+        staff.birthday = birthday;
+        staff.race = race;
+        staff.nationality = nationality;
+        staff.title = title;
+        staff.startJobDate = startJobDate;
+        staff.endJobDate = endJobDate;
+        staff.endProbationDate = endProbationDate;
+        staff.image = image;
+        staff.faith = faith;
+        staff.isDisplay = isDisplay;
+        staff.mobile = mobile;
+        staff.homePhone = homePhone;
+        staff.officeCall = officeCall;
+        staff.otherCall = otherCall;
+        staff.faxNumer = faxNumer;
+        staff.email = email;
+        staff.localAddress = localAddress;
+        staff.localCity = localCity;
+        staff.localPostCode = localPostCode;
+        staff.otherAddress = otherAddress;
+        staff.otherCity = otherCity;
+        staff.otherPostCode = otherPostCode;
+        staff.localState = localState;
+        staff.localCountry = localCountry;
+        staff.otherState = otherState;
+        staff.otherCountry = otherCountry;
+        staff.colorCode = colorCode;
+        staff.remark = remark;
         staff.sort = sort;
-        staff.createDate= createDate;
-        staff.updateDate= convertDateFormat(new Date());
+        staff.createDate = createDate;
+        staff.updateDate = convertDateFormat(new Date());
         staff.status = status;
-        
+
         await staff.save();
         result.code = 200;
         result.msg = "success";
@@ -319,7 +320,7 @@ export const sortStaff = async (req: express.Request, res: express.Response) => 
         const { list } = req.body;
         const staffs = list as Array<Condition>;
         for (const staff of staffs) {
-            const stf = await getStaffById(staff.id,"");
+            const stf = await getStaffById(staff.id, "");
             if (stf !== null && stf !== undefined && Object.keys(stf).length > 0) {
                 stf.sort = staff.sort;
                 stf.updateDate = convertDateFormat(new Date());;
@@ -344,7 +345,7 @@ export const displayStaff = async (req: express.Request, res: express.Response) 
         const { list } = req.body;
         const staffs = list as Array<Condition>;
         for (const staff of staffs) {
-            const stf = await getStaffById(staff.id,"");
+            const stf = await getStaffById(staff.id, "");
             if (stf !== null && stf !== undefined && Object.keys(stf).length > 0) {
                 stf.isDisplay = staff.isDisplay;
                 stf.updateDate = convertDateFormat(new Date());;

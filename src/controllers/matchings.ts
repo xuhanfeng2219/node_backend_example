@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 16:15:10
+ * @LastEditTime: 2023-05-24 13:02:00
  */
 import express from 'express';
 
-import { Page, PageResult, Result, Condition, convertDateFormat, Matching, matchServices } from '../common/common';
+import { Condition, Matching, Page, PageResult, Result, convertDateFormat, matchServices } from '../common/common';
 import { logger } from '../common/log';
-import { getMatchingByCode, createMatching, getMatchings, getMatchingById, deleteMatchingById, deleteMatchingsByIds, getMatchingByCondition, getMatchingsByLimit, getMatchingsByIds } from '../db/matchings';
+import { createMatching, deleteMatchingById, deleteMatchingsByIds, getMatchingByCode, getMatchingByCondition, getMatchingById, getMatchings, getMatchingsByIds, getMatchingsByLimit } from '../db/matchings';
 import { getServicesByIds } from '../db/services';
 
 export const getAllMatchings = async (req: express.Request, res: express.Response) => {
@@ -39,6 +39,11 @@ export const getMatchingsByCondition = async (req: express.Request, res: express
         const limit = query.limit === 0 || Object.keys(query).length === 0 ? 10 : query.limit;
         // const total = await getMatchingsCountByCondition(reg);
         const matchings = await getMatchingByCondition(reg, page, limit);
+        for (const match of matchings.docs) {
+            const serviceIds = match.get('serviceIds');
+            const services = await getServicesByIds(serviceIds);
+            match.set('serviceIds', services);
+        }
         result.result = matchings;
         // result.total = total;
         // result.page = page;

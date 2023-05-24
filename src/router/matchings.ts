@@ -4,13 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 21:00:57
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 16:04:48
+ * @LastEditTime: 2023-05-24 13:21:37
  */
 import express from 'express';
 
-import { getAllMatchings, deleteMatching, updateMatching, getMatchingsByPage, createdMatching, favoriteMatching, deleteMatchings, displayMatching, getMatchingsByCondition, queryMatchingsByIds } from '../controllers/matchings';
-import { isAuthenticated, isOwner } from '../middlewares';
-import { upload } from '../db/matchings';
+import { createdMatching, deleteMatching, deleteMatchings, displayMatching, favoriteMatching, getAllMatchings, getMatchingsByCondition, getMatchingsByPage, queryMatchingsByIds, updateMatching } from '../controllers/matchings';
 
 export default (router: express.Router) => {
     router.get('/api/matchings', getAllMatchings);

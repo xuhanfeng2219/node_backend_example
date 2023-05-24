@@ -4,12 +4,11 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 15:47:44
+ * @LastEditTime: 2023-05-24 11:47:22
  */
 import mongoose from "mongoose";
 import multer from "multer";
 import mongoosePaginate from 'mongoose-paginate-v2';
-import { Service } from "common/common";
 
 const MatchingSchema = new mongoose.Schema({
     // 概览

@@ -4,13 +4,13 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 20:58:20
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 17:04:53
+ * @LastEditTime: 2023-05-24 09:30:13
  */
 import express from 'express';
 
 import { Page, PageResult, Result, Condition, Customer, parseDate, convertDateFormat, getCustomersDocumets } from '../common/common';
 import { logger } from '../common/log';
-import { getCustomersByCondition2, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, createCustomers, getCustomersByLimit, CustomerDocument } from '../db/customers';
+import { queryCustomersByCondition, getCustomerByICNo, getCustomers, getCustomerByMobile, getCustomerById, createCustomer, deleteCustomerById, deleteCustomersByIds, createCustomers, getCustomersByLimit, CustomerDocument } from '../db/customers';
 import csv from 'csvtojson';
 
 
@@ -222,7 +222,7 @@ export const getCustomersByCondition = async (req: express.Request, res: express
         // const total = await getCustomersCountByCondition(reg);
         // const customers = await queryCustomersByCondition(reg, page, limit);
         // result.result = await getCustomersDocumets(customers);
-        result.result = await getCustomersByCondition2(reg, page, limit);
+        result.result = await queryCustomersByCondition(reg, page, limit);
         // result.total = total;
         // result.page = page;
         // result.limit = limit;

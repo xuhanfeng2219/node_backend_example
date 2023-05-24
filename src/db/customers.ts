@@ -4,7 +4,7 @@
  * @Autor: xuhanfeng
  * @Date: 2023-05-14 19:51:25
  * @LastEditors: xuhanfeng
- * @LastEditTime: 2023-05-23 19:42:26
+ * @LastEditTime: 2023-05-24 09:30:27
  */
 import mongoose from "mongoose";
 import multer from "multer";
@@ -65,7 +65,6 @@ export const getCustomers = () => CustomerModel.find();
 export const getCustomersByLimit = (page: number, limit: number) => CustomerPaginateModel.paginate({}, { page, limit, select: selectFileds });
 export const getCustomersCount = () => CustomerModel.count();
 export const getCustomersCountByCondition = (reg: RegExp) => CustomerModel.count({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] });
-export const getCustomersByCondition2 = (reg: RegExp, page: number, limit: number) => CustomerPaginateModel.paginate({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] }, { page, limit, select: selectFileds });
 export const queryCustomersByCondition = (reg: RegExp, page: number, limit: number) => CustomerPaginateModel.paginate({ $or: [{ lastname: reg }, { code: reg }, { mobile: reg }, { ICNo: reg }] }, { page, limit, select: selectFileds });
 export const getCustomerByMobile = (mobile: string) => CustomerModel.findOne({ mobile: mobile });
 export const getCustomerByICNo = (icNo: string) => CustomerModel.findOne({ ICNo: icNo });
